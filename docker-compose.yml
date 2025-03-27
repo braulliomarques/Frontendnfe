@@ -32,8 +32,8 @@ services:
       - "--accesslog.fields.names.DownstreamResponseSize=true"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./letsencrypt:/letsencrypt
-      - ./traefik:/etc/traefik
+      - ./data/letsencrypt:/letsencrypt
+      - ./data/traefik:/etc/traefik
     logging:
       driver: "json-file"
       options:
@@ -68,8 +68,8 @@ services:
       - "traefik.http.services.web.loadbalancer.sticky.cookie.sameSite=strict"
     volumes:
       - .:/app
-      - ./nfe_keys.txt:/app/nfe_keys.txt
-      - ./url_cache.json:/app/url_cache.json
+      - ./data/nfe_keys.txt:/app/nfe_keys.txt
+      - ./data/url_cache.json:/app/url_cache.json
     environment:
       - FLASK_APP=app.py
       - FLASK_ENV=production
