@@ -45,9 +45,8 @@ services:
           - node.role == manager
 
   web:
-    image: python:3.11-slim
+    image: registry.integraicontador.com/frontendnfe:latest
     volumes:
-      - app-code:/app
       - nfe-keys:/app/nfe_keys.txt
       - url-cache:/app/url_cache.json
     labels:
@@ -70,10 +69,6 @@ services:
       - FLASK_APP=app.py
       - FLASK_ENV=production
       - FLASK_DEBUG=0
-    command: >
-      bash -c "cd /app && 
-      pip install -r requirements.txt && 
-      flask run --host=0.0.0.0 --port=5000"
     logging:
       driver: "json-file"
       options:
@@ -90,8 +85,6 @@ volumes:
   traefik-letsencrypt:
     external: false
   traefik-config:
-    external: false
-  app-code:
     external: false
   nfe-keys:
     external: false
