@@ -45,7 +45,7 @@ services:
           - node.role == manager
 
   web:
-    image: ${REGISTRY_URL:-localhost}/frontendnfe:latest
+    image: frontendnfe:latest
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.web.rule=Host(`api.integraicontador.com`)"
