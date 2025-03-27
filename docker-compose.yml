@@ -2,7 +2,6 @@ version: '3.8'
 
 services:
   traefik:
-    container_name: frontapi_traefik
     image: traefik:v2.11.2
     command:
       - "--api.insecure=false"
@@ -25,13 +24,10 @@ services:
       - ./traefik:/etc/traefik
     networks:
       - frontapi_network
-    restart: unless-stopped
 
   web:
-    container_name: frontapi_web
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: frontapi_web
+    build: .
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.web.rule=Host(`api.integraicontador.com`)"
@@ -58,9 +54,7 @@ services:
       - FLASK_DEBUG=0
     networks:
       - frontapi_network
-    restart: unless-stopped
 
 networks:
   frontapi_network:
-    name: frontapi_network
     driver: bridge 
