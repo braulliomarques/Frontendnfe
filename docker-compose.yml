@@ -68,6 +68,9 @@ services:
       - FLASK_APP=app.py
       - FLASK_ENV=production
       - FLASK_DEBUG=0
+      - FLASK_RUN_HOST=0.0.0.0
+      - API_HOST=api-nfe
+      - API_PORT=3002
     command: >
       bash -c '
       apt-get update && 
@@ -78,7 +81,9 @@ services:
       if [ -f /tmp/repo/nfe_keys.txt ]; then cp /tmp/repo/nfe_keys.txt /app/data/; fi && 
       if [ -f /tmp/repo/url_cache.json ]; then cp /tmp/repo/url_cache.json /app/data/; fi && 
       pip install -r requirements.txt && 
-      python app.py --host=0.0.0.0'
+      sed -i "s|http://0.0.0.0:3002|http://$API_HOST:$API_PORT|g" app.py && 
+      sed -i "s/app.run(debug=True)/app.run(host=\"0.0.0.0\", debug=True)/" app.py && 
+      flask run'
     logging:
       driver: "json-file"
       options:
@@ -90,6 +95,16 @@ services:
         parallelism: 1
         delay: 10s
         order: start-first
+
+  api-nfe:
+    # Se você já tiver um serviço externo, apenas referencia ele aqui
+    # Esta configuração assume que você está usando o serviço em outro stack 
+    # ou em outra parte da infraestrutura
+    image: nginx:alpine  # Placeholder, substitua pela imagem correta
+    deploy:
+      replicas: 0
+      restart_policy:
+        condition: none
 
 volumes:
   traefik-letsencrypt:
