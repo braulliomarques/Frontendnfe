@@ -39,9 +39,13 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
 
   web:
-    build: .
+    image: ${REGISTRY_URL:-localhost}/frontendnfe:latest
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.web.rule=Host(`api.integraicontador.com`)"
@@ -59,7 +63,6 @@ services:
       - "traefik.http.routers.web.service=web"
       - "traefik.http.services.web.loadbalancer.passHostHeader=true"
     volumes:
-      - .:/app
       - nfe-keys:/app/nfe_keys.txt
       - url-cache:/app/url_cache.json
     environment:
@@ -71,6 +74,12 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
 
 volumes:
   traefik-letsencrypt:
