@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   traefik:
+    container_name: frontapi_traefik
     image: traefik:v2.11.2
     command:
       - "--api.insecure=false"
@@ -27,6 +28,7 @@ services:
     restart: unless-stopped
 
   web:
+    container_name: frontapi_web
     build:
       context: .
       dockerfile: Dockerfile
