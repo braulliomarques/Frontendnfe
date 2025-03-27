@@ -67,7 +67,7 @@ services:
       - "traefik.http.services.web.loadbalancer.sticky.cookie.httpOnly=true"
       - "traefik.http.services.web.loadbalancer.sticky.cookie.sameSite=strict"
     volumes:
-      - .:/app
+      - app_data:/app
       - nfe_keys_data:/app/nfe_keys.txt
       - url_cache_data:/app/url_cache.json
     environment:
@@ -83,5 +83,6 @@ services:
 volumes:
   letsencrypt_data:
   traefik_data:
+  app_data:
   nfe_keys_data:
   url_cache_data: 
