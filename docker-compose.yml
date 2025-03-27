@@ -22,8 +22,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./letsencrypt:/letsencrypt
       - ./traefik:/etc/traefik
-    networks:
-      - frontapi_network
 
   web:
     image: frontapi_web
@@ -51,10 +49,4 @@ services:
     environment:
       - FLASK_APP=app.py
       - FLASK_ENV=production
-      - FLASK_DEBUG=0
-    networks:
-      - frontapi_network
-
-networks:
-  frontapi_network:
-    driver: bridge 
+      - FLASK_DEBUG=0 
