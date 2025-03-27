@@ -23,7 +23,7 @@ services:
       - ./letsencrypt:/letsencrypt
       - ./traefik:/etc/traefik
     networks:
-      - web
+      - frontapi_network
     restart: unless-stopped
 
   web:
@@ -55,9 +55,10 @@ services:
       - FLASK_ENV=production
       - FLASK_DEBUG=0
     networks:
-      - web
+      - frontapi_network
     restart: unless-stopped
 
 networks:
-  web:
+  frontapi_network:
+    name: frontapi_network
     driver: bridge 
