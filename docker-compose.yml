@@ -45,7 +45,7 @@ services:
           - node.role == manager
 
   web:
-    image: tiangolo/uvicorn-gunicorn-flask:python3.11
+    image: tiangolo/uwsgi-nginx-flask:python3.11
     volumes:
       - nfe-keys:/app/nfe_keys.txt
       - url-cache:/app/url_cache.json
