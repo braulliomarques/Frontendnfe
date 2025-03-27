@@ -14,11 +14,31 @@ services:
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
       - "--providers.file.directory=/etc/traefik/dynamic"
       - "--providers.file.watch=true"
-      - "--log.level=INFO"
+      - "--log.level=DEBUG"
+      - "--accesslog=true"
+      - "--accesslog.fields.names.StartUTC=true"
+      - "--accesslog.fields.names.Duration=true"
+      - "--accesslog.fields.names.ClientUsername=true"
+      - "--accesslog.fields.names.RequestHost=true"
+      - "--accesslog.fields.names.RequestPath=true"
+      - "--accesslog.fields.names.RequestMethod=true"
+      - "--accesslog.fields.names.RequestProtocol=true"
+      - "--accesslog.fields.names.DownstreamStatus=true"
+      - "--accesslog.fields.names.RouterName=true"
+      - "--accesslog.fields.names.ServiceName=true"
+      - "--accesslog.fields.names.ServiceURL=true"
+      - "--accesslog.fields.names.DownstreamStatus=true"
+      - "--accesslog.fields.names.DownstreamHost=true"
+      - "--accesslog.fields.names.DownstreamResponseSize=true"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./letsencrypt:/letsencrypt
       - ./traefik:/etc/traefik
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   web:
     image: frontapi_web
@@ -39,6 +59,13 @@ services:
       - "traefik.http.middlewares.web-headers.headers.stsIncludeSubdomains=true"
       - "traefik.http.middlewares.web-headers.headers.stsPreload=true"
       - "traefik.http.routers.web.middlewares=web-headers"
+      - "traefik.http.routers.web.service=web"
+      - "traefik.http.services.web.loadbalancer.passHostHeader=true"
+      - "traefik.http.services.web.loadbalancer.sticky.cookie=true"
+      - "traefik.http.services.web.loadbalancer.sticky.cookie.name=frontapi_session"
+      - "traefik.http.services.web.loadbalancer.sticky.cookie.secure=true"
+      - "traefik.http.services.web.loadbalancer.sticky.cookie.httpOnly=true"
+      - "traefik.http.services.web.loadbalancer.sticky.cookie.sameSite=strict"
     volumes:
       - .:/app
       - ./nfe_keys.txt:/app/nfe_keys.txt
@@ -46,4 +73,9 @@ services:
     environment:
       - FLASK_APP=app.py
       - FLASK_ENV=production
-      - FLASK_DEBUG=0 
+      - FLASK_DEBUG=0
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3" 
