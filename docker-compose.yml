@@ -45,9 +45,9 @@ services:
           - node.role == manager
 
   web:
-    image: tiangolo/uwsgi-nginx-flask:python3.11
+    image: python:3.11-slim
     volumes:
-      - ./:/app
+      - app-code:/app
       - nfe-keys:/app/nfe_keys.txt
       - url-cache:/app/url_cache.json
     labels:
@@ -57,7 +57,7 @@ services:
       - "traefik.http.routers.web.tls=true"
       - "traefik.http.routers.web.tls.certresolver=myresolver"
       - "traefik.http.middlewares.web-redirect.redirectscheme.scheme=https"
-      - "traefik.http.services.web.loadbalancer.server.port=80"
+      - "traefik.http.services.web.loadbalancer.server.port=5000"
       - "traefik.http.middlewares.web-compress.compress=true"
       - "traefik.http.middlewares.web-headers.headers.sslRedirect=true"
       - "traefik.http.middlewares.web-headers.headers.stsSeconds=31536000"
@@ -70,6 +70,10 @@ services:
       - FLASK_APP=app.py
       - FLASK_ENV=production
       - FLASK_DEBUG=0
+    command: >
+      bash -c "cd /app && 
+      pip install -r requirements.txt && 
+      flask run --host=0.0.0.0 --port=5000"
     logging:
       driver: "json-file"
       options:
@@ -86,6 +90,8 @@ volumes:
   traefik-letsencrypt:
     external: false
   traefik-config:
+    external: false
+  app-code:
     external: false
   nfe-keys:
     external: false
