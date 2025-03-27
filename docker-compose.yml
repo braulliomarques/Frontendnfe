@@ -47,8 +47,7 @@ services:
   web:
     image: tiangolo/uwsgi-nginx-flask:python3.11
     volumes:
-      - nfe-keys:/app/nfe_keys.txt
-      - url-cache:/app/url_cache.json
+      - app-data:/app/data
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.web.rule=Host(`api.integraicontador.com`)"
@@ -69,7 +68,17 @@ services:
       - FLASK_APP=app.py
       - FLASK_ENV=production
       - FLASK_DEBUG=0
-    command: bash -c 'apt-get update && apt-get install -y git && git clone https://github.com/braulliomarques/Frontendnfe.git /tmp/repo && cp -r /tmp/repo/* /app/ && pip install -r requirements.txt && python app.py'
+    command: >
+      bash -c '
+      apt-get update && 
+      apt-get install -y git && 
+      git clone https://github.com/braulliomarques/Frontendnfe.git /tmp/repo && 
+      mkdir -p /app/data && 
+      cp -r /tmp/repo/* /app/ && 
+      if [ -f /tmp/repo/nfe_keys.txt ]; then cp /tmp/repo/nfe_keys.txt /app/data/; fi && 
+      if [ -f /tmp/repo/url_cache.json ]; then cp /tmp/repo/url_cache.json /app/data/; fi && 
+      pip install -r requirements.txt && 
+      python app.py'
     logging:
       driver: "json-file"
       options:
@@ -87,7 +96,5 @@ volumes:
     external: false
   traefik-config:
     external: false
-  nfe-keys:
-    external: false
-  url-cache:
+  app-data:
     external: false 
