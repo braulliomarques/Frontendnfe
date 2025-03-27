@@ -41,8 +41,10 @@ services:
         max-file: "3"
 
   web:
-    image: frontapi_web
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: frontapi_web:latest
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.web.rule=Host(`api.integraicontador.com`)"
