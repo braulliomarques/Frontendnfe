@@ -45,7 +45,7 @@ services:
           - node.role == manager
 
   web:
-    image: registry.integraicontador.com/frontendnfe:latest
+    image: tiangolo/uvicorn-gunicorn-flask:python3.11
     volumes:
       - nfe-keys:/app/nfe_keys.txt
       - url-cache:/app/url_cache.json
@@ -56,7 +56,7 @@ services:
       - "traefik.http.routers.web.tls=true"
       - "traefik.http.routers.web.tls.certresolver=myresolver"
       - "traefik.http.middlewares.web-redirect.redirectscheme.scheme=https"
-      - "traefik.http.services.web.loadbalancer.server.port=5000"
+      - "traefik.http.services.web.loadbalancer.server.port=80"
       - "traefik.http.middlewares.web-compress.compress=true"
       - "traefik.http.middlewares.web-headers.headers.sslRedirect=true"
       - "traefik.http.middlewares.web-headers.headers.stsSeconds=31536000"
@@ -69,6 +69,7 @@ services:
       - FLASK_APP=app.py
       - FLASK_ENV=production
       - FLASK_DEBUG=0
+    command: bash -c 'apt-get update && apt-get install -y git && git clone https://github.com/SEU_USUARIO/Frontendnfe.git /tmp/repo && cp -r /tmp/repo/* /app/ && pip install -r requirements.txt && python app.py'
     logging:
       driver: "json-file"
       options:
