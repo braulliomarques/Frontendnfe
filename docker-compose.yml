@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  traefik:
+    image: traefik:v2.11.2
+    command:
+      - "--api.insecure=false"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=admin@integraicontador.com"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      - "--providers.file.directory=/etc/traefik/dynamic"
+      - "--providers.file.watch=true"
+      - "--log.level=INFO"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./letsencrypt:/letsencrypt
+      - ./traefik:/etc/traefik
+    networks:
+      - web
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.web.rule=Host(`api.integraicontador.com`)"
+      - "traefik.http.routers.web.entrypoints=websecure"
+      - "traefik.http.routers.web.tls=true"
+      - "traefik.http.routers.web.tls.certresolver=myresolver"
+      - "traefik.http.routers.web.middlewares=web-redirect"
+      - "traefik.http.middlewares.web-redirect.redirectscheme.scheme=https"
+      - "traefik.http.services.web.loadbalancer.server.port=5000"
+      - "traefik.http.middlewares.web-compress.compress=true"
+      - "traefik.http.routers.web.middlewares=web-compress"
+      - "traefik.http.middlewares.web-headers.headers.sslRedirect=true"
+      - "traefik.http.middlewares.web-headers.headers.stsSeconds=31536000"
+      - "traefik.http.middlewares.web-headers.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.web-headers.headers.stsPreload=true"
+      - "traefik.http.routers.web.middlewares=web-headers"
+    volumes:
+      - .:/app
+      - ./nfe_keys.txt:/app/nfe_keys.txt
+      - ./url_cache.json:/app/url_cache.json
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=production
+      - FLASK_DEBUG=0
+    networks:
+      - web
+    restart: unless-stopped
+
+networks:
+  web:
+    driver: bridge 
