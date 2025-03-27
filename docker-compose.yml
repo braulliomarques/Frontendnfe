@@ -45,7 +45,11 @@ services:
           - node.role == manager
 
   web:
-    image: frontendnfe:latest
+    image: tiangolo/uwsgi-nginx-flask:python3.11
+    volumes:
+      - ./:/app
+      - nfe-keys:/app/nfe_keys.txt
+      - url-cache:/app/url_cache.json
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.web.rule=Host(`api.integraicontador.com`)"
@@ -53,7 +57,7 @@ services:
       - "traefik.http.routers.web.tls=true"
       - "traefik.http.routers.web.tls.certresolver=myresolver"
       - "traefik.http.middlewares.web-redirect.redirectscheme.scheme=https"
-      - "traefik.http.services.web.loadbalancer.server.port=5000"
+      - "traefik.http.services.web.loadbalancer.server.port=80"
       - "traefik.http.middlewares.web-compress.compress=true"
       - "traefik.http.middlewares.web-headers.headers.sslRedirect=true"
       - "traefik.http.middlewares.web-headers.headers.stsSeconds=31536000"
@@ -62,9 +66,6 @@ services:
       - "traefik.http.routers.web.middlewares=web-headers,web-compress"
       - "traefik.http.routers.web.service=web"
       - "traefik.http.services.web.loadbalancer.passHostHeader=true"
-    volumes:
-      - nfe-keys:/app/nfe_keys.txt
-      - url-cache:/app/url_cache.json
     environment:
       - FLASK_APP=app.py
       - FLASK_ENV=production
