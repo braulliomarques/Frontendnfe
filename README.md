@@ -24,42 +24,6 @@ Um sistema gratuito e de código aberto para contadores e escritórios contábei
 
 ---
 
-## 🚀 Instalação
-
-### Alternativa 1: Clonar o repositório via Git
-
-```bash
-git clone https://github.com/braulliomarques/nfe-livre.git
-cd nfe-livre
-```
-
-### Alternativa 2: Baixar o ZIP do Projeto
-
-[Download .zip do repositório](https://github.com/braulliomarques/nfe-livre/archive/refs/heads/main.zip)
-
-Depois de baixar, extraia o conteúdo e abra a pasta extraída no terminal para continuar com a instalação.
-
----
-
-### Para usuários de Linux e macOS
-
-```bash
-# Crie um ambiente virtual
-python -m venv venv
-
-# Ative o ambiente virtual
-source venv/bin/activate
-
-# Instale as dependências
-pip install -r requirements.txt
-
-# Execute a aplicação
-python app.py
-```
-
-Acesse no navegador: http://localhost:5000
-
----
 
 ### Para usuários de Windows
 
@@ -100,10 +64,18 @@ npm --version
 
 #### 4. Configurando o Projeto
 
+
+## 🚀 Instalação
+
+Baixar o ZIP do Projeto
+
+[Download .zip do repositório](https://github.com/braulliomarques/Frontendnfe/archive/refs/heads/main.zip)
+
+Depois de baixar, extraia o conteúdo e abra a pasta extraída no terminal para continuar com a instalação.
+
+
 ```bash
-# Clone o repositório (caso ainda não tenha feito)
-git clone https://github.com/braulliomarques/nfe-livre.git
-cd nfe-livre
+
 
 # Crie o ambiente virtual
 python -m venv venv
