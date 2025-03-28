@@ -1,4 +1,4 @@
- # NFe Livre - Sistema de Download de Notas Fiscais Eletrônicas
+# NFe Livre - Sistema de Download de Notas Fiscais Eletrônicas
 
 Um sistema gratuito e de código aberto para contadores e escritórios contábeis baixarem Notas Fiscais Eletrônicas (NF-e) utilizando os webservices da Receita Federal.
 
@@ -18,12 +18,24 @@ Um sistema gratuito e de código aberto para contadores e escritórios contábei
 
 ## 🚀 Instalação
 
+### Pré-requisitos
+
+1. **Python 3.8 ou superior**
+   - Baixe em https://www.python.org/downloads/
+   - Durante a instalação, marque a opção "Add Python to PATH"
+
+2. **Node.js 18 ou superior**
+   - Baixe em https://nodejs.org/
+   - Escolha a versão LTS (Long Term Support)
+   - Durante a instalação, mantenha as opções padrão
+   - Após instalar, reinicie o computador
+
 ### Para usuários de Linux e macOS
 
 ```bash
 # Clone o repositório
-git clone https://github.com/braulliomarques/Frontendnfe
-
+git clone https://github.com/seu-usuario/nfe-livre.git
+cd nfe-livre
 
 # Crie um ambiente virtual
 python -m venv venv
@@ -34,8 +46,8 @@ source venv/bin/activate
 # Instale as dependências
 pip install -r requirements.txt
 
-# Execute a aplicação
-flask run --host=0.0.0.0 --port=5000
+# Execute o sistema
+python start.py
 ```
 
 ### Para usuários de Windows
@@ -76,14 +88,22 @@ venv\Scripts\activate
 # Instale as dependências
 pip install -r requirements.txt
 
-# Execute a aplicação
-python app.py
-ou python3 app.py
+# Execute o sistema
+python start.py
 ```
 
 Após iniciar, acesse a aplicação em seu navegador: http://localhost:5000
 
-## 📱 Como usar
+## 📝 Notas Importantes
+
+- O sistema é composto por duas partes: uma API Node.js e uma interface web Flask
+- O script `start.py` inicia automaticamente ambas as partes
+- A API roda na porta 3002 e a interface web na porta 5000
+- Certifique-se de que as portas 3002 e 5000 estejam disponíveis em seu computador
+- Se você receber um erro sobre Node.js não estar instalado, siga as instruções de instalação acima
+- Se a pasta 'api' não for encontrada, baixe o projeto completo em: https://github.com/braulliomarques/nfe-consulta-api/archive/refs/heads/main.zip
+
+##  Como usar
 
 1. **Página Inicial**: Contém informações sobre o sistema e seus benefícios
  Acessível pela URL http://localhost:5000
