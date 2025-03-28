@@ -97,10 +97,20 @@ def get_nfe_url(key: str):
 
 @app.route('/')
 def index():
-    """Página principal com lista de NFEs."""
+    """Página principal - landing page."""
+    return render_template('landing.html')
+
+@app.route('/consulta')
+def consulta():
+    """Página de consulta com lista de NFEs."""
     keys = read_nfe_keys('nfe_keys.txt')
     cache = load_cache()
     return render_template('index.html', keys=keys, cache=cache)
+
+@app.route('/landing')
+def landing():
+    """Rota alternativa para landing - redireciona para a página principal."""
+    return render_template('landing.html')
 
 @app.route('/get-url/<key>')
 def get_url(key):
@@ -163,6 +173,158 @@ def clear_cache_endpoint():
             'success': False,
             'message': f'Erro ao limpar cache: {str(e)}'
         }), 500
+
+@app.route('/save-key', methods=['POST'])
+def save_key():
+    """Endpoint para salvar chave NFe no arquivo."""
+    try:
+        data = request.json
+        key = data.get('key')
+        
+        if not key:
+            return jsonify({'success': False, 'message': 'Chave NFe não fornecida'}), 400
+        
+        # Valida a chave (deve ter 44 dígitos numéricos)
+        if not (key.isdigit() and len(key) == 44):
+            return jsonify({'success': False, 'message': 'Formato de chave inválido. Deve ter 44 dígitos numéricos'}), 400
+        
+        # Lê as chaves existentes
+        existing_keys = read_nfe_keys('nfe_keys.txt')
+        
+        # Verifica se a chave já existe
+        if key in existing_keys:
+            return jsonify({'success': True, 'message': 'Chave já existe', 'already_exists': True})
+        
+        # Adiciona a chave ao arquivo
+        with open('nfe_keys.txt', 'a') as file:
+            file.write(f"\n{key}")
+        
+        return jsonify({'success': True, 'message': 'Chave adicionada com sucesso'})
+    
+    except Exception as e:
+        logging.error(f"Erro ao salvar chave: {str(e)}")
+        return jsonify({'success': False, 'message': f'Erro ao salvar chave: {str(e)}'}), 500
+
+@app.route('/save-multiple-keys', methods=['POST'])
+def save_multiple_keys():
+    """Endpoint para salvar múltiplas chaves NFe no arquivo."""
+    try:
+        data = request.json
+        keys = data.get('keys', [])
+        
+        if not keys:
+            return jsonify({'success': False, 'message': 'Nenhuma chave NFe fornecida'}), 400
+        
+        # Lê as chaves existentes
+        existing_keys = read_nfe_keys('nfe_keys.txt')
+        
+        added_keys = []
+        invalid_keys = []
+        existing_count = 0
+        
+        for key in keys:
+            key = key.strip()
+            
+            # Pula chaves vazias
+            if not key:
+                continue
+            
+            # Valida a chave (deve ter 44 dígitos numéricos)
+            if not (key.isdigit() and len(key) == 44):
+                invalid_keys.append(key)
+                continue
+            
+            # Verifica se a chave já existe
+            if key in existing_keys:
+                existing_count += 1
+                continue
+            
+            # Adiciona à lista de chaves a serem salvas
+            added_keys.append(key)
+            existing_keys.append(key)
+        
+        # Se há chaves válidas para adicionar
+        if added_keys:
+            with open('nfe_keys.txt', 'a') as file:
+                for key in added_keys:
+                    file.write(f"\n{key}")
+        
+        # Prepara a resposta
+        result = {
+            'success': True,
+            'message': f'{len(added_keys)} chaves adicionadas com sucesso.',
+            'added_count': len(added_keys),
+            'invalid_count': len(invalid_keys),
+            'existing_count': existing_count,
+            'invalid_keys': invalid_keys[:10]  # Limita para não sobrecarregar a resposta
+        }
+        
+        return jsonify(result)
+    
+    except Exception as e:
+        logging.error(f"Erro ao salvar múltiplas chaves: {str(e)}")
+        return jsonify({'success': False, 'message': f'Erro ao salvar chaves: {str(e)}'}), 500
+
+@app.route('/delete-key', methods=['POST'])
+def delete_key():
+    """Endpoint para remover uma chave NFe do arquivo."""
+    try:
+        data = request.json
+        key = data.get('key')
+        
+        if not key:
+            return jsonify({'success': False, 'message': 'Chave NFe não fornecida'}), 400
+        
+        # Lê as chaves existentes
+        existing_keys = read_nfe_keys('nfe_keys.txt')
+        
+        # Verifica se a chave existe
+        if key not in existing_keys:
+            return jsonify({'success': False, 'message': 'Chave NFe não encontrada'}), 404
+        
+        # Remove a chave da lista
+        existing_keys.remove(key)
+        
+        # Reescreve o arquivo sem a chave removida
+        with open('nfe_keys.txt', 'w') as file:
+            file.write('\n'.join(existing_keys))
+        
+        # Limpa o cache para a chave removida
+        cache = load_cache()
+        if key in cache:
+            del cache[key]
+            save_cache(cache)
+        
+        return jsonify({'success': True, 'message': 'Chave NFe removida com sucesso'})
+    
+    except Exception as e:
+        logging.error(f"Erro ao remover chave: {str(e)}")
+        return jsonify({'success': False, 'message': f'Erro ao remover chave: {str(e)}'}), 500
+
+@app.route('/delete-all-keys', methods=['POST'])
+def delete_all_keys():
+    """Endpoint para remover todas as chaves NFe do arquivo."""
+    try:
+        # Lê as chaves existentes para contagem
+        existing_keys = read_nfe_keys('nfe_keys.txt')
+        num_keys = len(existing_keys)
+        
+        # Cria um arquivo vazio para limpar todas as chaves
+        with open('nfe_keys.txt', 'w') as file:
+            file.write('')
+        
+        # Limpa todo o cache
+        clear_cache()
+        
+        return jsonify({
+            'success': True, 
+            'message': f'Todas as chaves foram removidas com sucesso ({num_keys} chaves)',
+            'count': num_keys
+        })
+    
+    except Exception as e:
+        logging.error(f"Erro ao remover todas as chaves: {str(e)}")
+        return jsonify({'success': False, 'message': f'Erro ao remover todas as chaves: {str(e)}'}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000) 

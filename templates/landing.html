@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NF-e Livre | Pare de pagar por sistemas que você pode ter de graça</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #10b981;
+            --dark: #1e293b;
+            --light: #f8fafc;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--dark);
+            background-color: var(--light);
+        }
+        
+        .hero {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 6rem 0;
+        }
+        
+        .btn-primary {
+            background-color: var(--secondary);
+            border-color: var(--secondary);
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0d9488;
+            border-color: #0d9488;
+            transform: translateY(-2px);
+        }
+        
+        .navbar {
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        h1 {
+            font-weight: 800;
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .lead {
+            font-size: 1.25rem;
+            font-weight: 400;
+            margin-bottom: 2rem;
+        }
+        
+        /* Animação da imagem */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .cartoon-img {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .highlight-text {
+            background-color: rgba(16, 185, 129, 0.2);
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-file-invoice text-primary"></i> NFe Livre
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#beneficios">Benefícios</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#como-funciona">Como Funciona</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#getting-started">Começando a Usar</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#depoimentos">Depoimentos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#faq">Perguntas Frequentes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-primary ms-lg-3" href="#download">Baixar Agora</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1>As empresas de software não querem que você saiba… Mas você pode ter sua própria ferramenta de NF-e!</h1>
+                    <p class="lead">Baixe agora o projeto completo e pare de pagar por sistemas que você pode ter de graça.</p>
+                    <p class="lead">💡 Com a inteligência artificial e os webservices do governo, qualquer contador pode baixar NF-e de saída direto do seu computador. Sem mensalidade, sem limitações.</p>
+                    <div class="d-flex gap-3">
+                        <a href="#download" class="btn btn-primary btn-lg">
+                            <i class="fas fa-download me-2"></i> Baixar Gratuitamente
+                        </a>
+                        <a href="#demo" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-play-circle me-2"></i> Ver Demo
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-6 d-none d-lg-block">
+                    <div class="position-relative">
+                        <img src="/static/cartoon.png" alt="Contador feliz por descobrir que pode ter seu próprio sistema" class="img-fluid rounded-3 cartoon-img">
+                        <div class="position-absolute bottom-0 start-0 end-0 p-3 bg-primary bg-opacity-75 rounded-bottom">
+                            <p class="text-center mb-0 text-light fst-italic">
+                                <i class="fas fa-quote-left me-2 opacity-50"></i>
+                                "Finalmente livre das mensalidades! <span class="highlight-text">Economizo todos os meses</span>"
+                                <i class="fas fa-quote-right ms-2 opacity-50"></i>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section class="py-5" id="beneficios">
+        <div class="container py-5">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold mb-3">Por que usar nossa solução?</h2>
+                <p class="lead text-muted mx-auto" style="max-width: 700px;">
+                    Desenvolvida especialmente para contadores e profissionais contábeis que 
+                    desejam otimizar seus processos e reduzir custos.
+                </p>
+            </div>
+            
+            <div class="row g-4">
+                <!-- Benefit 1 -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="rounded-circle bg-primary bg-opacity-10 p-3 d-inline-flex mb-3">
+                                <i class="fas fa-money-bill-wave fa-2x text-primary"></i>
+                            </div>
+                            <h5 class="fw-bold">100% Gratuito</h5>
+                            <p class="text-muted">
+                                Economize com licenças de sistemas caros. Nossa solução é completamente gratuita e open-source.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Benefit 2 -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="rounded-circle bg-primary bg-opacity-10 p-3 d-inline-flex mb-3">
+                                <i class="fas fa-lock fa-2x text-primary"></i>
+                            </div>
+                            <h5 class="fw-bold">Seguro e Confiável</h5>
+                            <p class="text-muted">
+                                Código aberto verificável. Sem compartilhamento de dados sensíveis com terceiros.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Benefit 3 -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="rounded-circle bg-primary bg-opacity-10 p-3 d-inline-flex mb-3">
+                                <i class="fas fa-tachometer-alt fa-2x text-primary"></i>
+                            </div>
+                            <h5 class="fw-bold">Rápido e Eficiente</h5>
+                            <p class="text-muted">
+                                Baixe múltiplas NF-e com apenas um clique. Sistema otimizado para alto desempenho.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Benefit 4 -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="rounded-circle bg-primary bg-opacity-10 p-3 d-inline-flex mb-3">
+                                <i class="fas fa-code fa-2x text-primary"></i>
+                            </div>
+                            <h5 class="fw-bold">Personalizável</h5>
+                            <p class="text-muted">
+                                Código fonte aberto permite adaptação às necessidades específicas do seu escritório contábil.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+          
+        </div>
+    </section>
+
+    <!-- How it Works Section -->
+    <section class="py-5 bg-light" id="como-funciona">
+        <div class="container py-5">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold mb-3">Como Funciona</h2>
+                <p class="lead text-muted mx-auto" style="max-width: 700px;">
+                    Nosso sistema é simples e intuitivo. Em apenas 3 passos você terá acesso a todas as NF-e dos seus clientes.
+                </p>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-10 mx-auto">
+                    <div class="row g-5">
+                        <!-- Step 1 -->
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <div class="rounded-circle bg-primary text-white d-inline-flex justify-content-center align-items-center mb-4" style="width: 60px; height: 60px;">
+                                    <span class="fs-4 fw-bold">1</span>
+                                </div>
+                                <h4 class="fw-bold mb-3">Clone o Repositório</h4>
+                                <p class="text-muted">
+                                    Baixe o código do GitHub ou clone o repositório em seu computador usando Git.
+                                </p>
+                                <div class="mt-3 p-3 bg-white rounded shadow-sm" style="font-family: monospace; text-align: left;">
+                                    <code>git clone https://github.com/braulliomarques/nfe-consulta-api.git</code>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 2 -->
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <div class="rounded-circle bg-primary text-white d-inline-flex justify-content-center align-items-center mb-4" style="width: 60px; height: 60px;">
+                                    <span class="fs-4 fw-bold">2</span>
+                                </div>
+                                <h4 class="fw-bold mb-3">Instale as Dependências</h4>
+                                <p class="text-muted">
+                                    Instale os requisitos necessários usando o gerenciador de pacotes pip.
+                                </p>
+                                <div class="mt-3 p-3 bg-white rounded shadow-sm" style="font-family: monospace; text-align: left;">
+                                    <code>pip install -r requirements.txt</code>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 3 -->
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <div class="rounded-circle bg-primary text-white d-inline-flex justify-content-center align-items-center mb-4" style="width: 60px; height: 60px;">
+                                    <span class="fs-4 fw-bold">3</span>
+                                </div>
+                                <h4 class="fw-bold mb-3">Execute e Use</h4>
+                                <p class="text-muted">
+                                    Inicie a aplicação e insira as chaves de NF-e para baixar os documentos em XML.
+                                </p>
+                                <div class="mt-3 p-3 bg-white rounded shadow-sm" style="font-family: monospace; text-align: left;">
+                                    <code>python app.py</code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-5 pt-4 text-center">
+                        <div class="p-4 bg-white rounded-3 shadow-sm d-inline-block">
+                            <h4 class="fw-bold mb-3">Fluxo de Funcionamento</h4>
+                            <div class="d-flex justify-content-center">
+                                <div class="d-flex align-items-center">
+                                    <div class="text-center px-3">
+                                        <i class="fas fa-key fa-2x text-primary mb-2"></i>
+                                        <p class="small mb-0">Chave da NFe</p>
+                                    </div>
+                                    <i class="fas fa-arrow-right mx-3 text-muted"></i>
+                                    <div class="text-center px-3">
+                                        <i class="fas fa-search fa-2x text-primary mb-2"></i>
+                                        <p class="small mb-0">Consulta</p>
+                                    </div>
+                                    <i class="fas fa-arrow-right mx-3 text-muted"></i>
+                                    <div class="text-center px-3">
+                                        <i class="fas fa-file-download fa-2x text-primary mb-2"></i>
+                                        <p class="small mb-0">Download XML</p>
+                                    </div>
+                                    <i class="fas fa-arrow-right mx-3 text-muted"></i>
+                                    <div class="text-center px-3">
+                                        <i class="fas fa-file-invoice fa-2x text-primary mb-2"></i>
+                                        <p class="small mb-0">Importação</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Getting Started Section -->
+    <section class="py-5" id="getting-started">
+        <div class="container py-5">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold mb-3">Começando a Usar</h2>
+                <p class="lead text-muted mx-auto" style="max-width: 700px;">
+                    Após instalar e executar a API, siga estas etapas para começar a baixar seus XMLs.
+                </p>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="card border-0 shadow-lg rounded-3 overflow-hidden mb-5">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center me-3" style="width: 50px; height: 50px;">
+                                    <i class="fas fa-desktop fa-lg"></i>
+                                </div>
+                                <h4 class="fw-bold mb-0">Acessando a Interface</h4>
+                            </div>
+                            <p class="mb-4">
+                                Depois de executar o servidor da API,  a API estará rodando localmente no seu computador. 
+                                Para começar a usar, acesso o app no botão abaixo:
+                            </p>
+                            <ol class="mb-4">
+
+                                <li class="mb-3">
+                                    <strong>Você será direcionado para a página principal</strong> - Onde poderá inserir as chaves de NF-e e baixar os XMLs.
+                                </li>
+                            </ol>
+                            <div class="text-center mt-4">
+                                <a href="/consulta" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-external-link-alt me-2"></i>Acessar Interface Principal
+                                </a>
+                                <p class="text-muted small mt-2">
+                                    Certifique-se de que a API esteja rodando antes de clicar no botão acima.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card border-0 shadow-lg rounded-3 overflow-hidden mb-5">
+                        <div class="card-body p-4">
+                            <h4 class="fw-bold mb-3 text-center">Interface Principal</h4>
+                            <p class="text-center text-muted mb-4">
+                                Na página principal você verá uma lista com suas chaves de NF-e e poderá baixar os XMLs individualmente ou em massa.
+                            </p>
+                            <div class="text-center">
+                                <img src="https://via.placeholder.com/800x400?text=Interface+do+Sistema" alt="Interface do Sistema" class="img-fluid rounded shadow-sm">
+                                <p class="text-muted small mt-3">
+                                    Interface onde você poderá ver e baixar suas NF-e em formato XML.
+                                </p>
+                            </div>
+                            
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <h5 class="fw-bold mb-3"><i class="fas fa-check-circle text-primary me-2"></i>Funcionalidades</h5>
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i>Visualizar todas as chaves NFe cadastradas</li>
+                                        <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i>Baixar XML individual por chave</li>
+                                        <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i>Baixar todos os XMLs de uma vez</li>
+                                        <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i>Verificar status de cada download</li>
+                                        <li><i class="fas fa-arrow-right text-primary me-2"></i>Gerenciar cache para consultas mais rápidas</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5 class="fw-bold mb-3"><i class="fas fa-lightbulb text-primary me-2"></i>Dicas de Uso</h5>
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i>Mantenha o arquivo nfe_keys.txt atualizado</li>
+                                        <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i>Use o botão "Baixar Todos os XMLs" para processamento em lote</li>
+                                        <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i>Clique em "Limpar Cache" se precisar atualizar os dados</li>
+                                        <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i>Observe a barra de progresso durante downloads em massa</li>
+                                        <li><i class="fas fa-arrow-right text-primary me-2"></i>Acompanhe o status de cada chave na tabela principal</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="bg-light p-4 rounded-3 d-inline-block">
+                            <h5 class="fw-bold mb-3">Dica: Adicione suas chaves de NF-e</h5>
+                            <p class="mb-0">
+                                Você pode adicionar suas chaves de NF-e diretamente no arquivo <code>nfe_keys.txt</code>, uma por linha, 
+                                para facilitar o processo de consulta em massa.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="py-5" id="depoimentos">
+        <div class="container py-5">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold mb-3">O que os contadores estão dizendo</h2>
+                <p class="lead text-muted mx-auto" style="max-width: 700px;">
+                    Profissionais da área contábil já estão economizando tempo e dinheiro com nossa solução.
+                </p>
+            </div>
+            
+            <div class="row g-4">
+                <!-- Testimonial 1 -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="d-flex mb-4">
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                            </div>
+                            <p class="mb-4">
+                                "Economizamos mais de R$ 4.800 por ano desde que deixamos de usar um sistema pago. A ferramenta é simples, rápida e atende perfeitamente nossas necessidades para baixar NF-e de clientes."
+                            </p>
+                            <div class="d-flex align-items-center">
+                                <img src="https://via.placeholder.com/50" class="rounded-circle me-3" alt="Foto de perfil">
+                                <div>
+                                    <h6 class="fw-bold mb-0">Carlos Oliveira</h6>
+                                    <p class="small text-muted mb-0">Contador, Oliveira Contabilidade</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Testimonial 2 -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="d-flex mb-4">
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                            </div>
+                            <p class="mb-4">
+                                "Finalmente uma solução que não cobra mensalidade! Consigo baixar todos os XMLs de NF-e dos meus clientes sem complicação. A interface é intuitiva e funciona perfeitamente."
+                            </p>
+                            <div class="d-flex align-items-center">
+                                <img src="https://via.placeholder.com/50" class="rounded-circle me-3" alt="Foto de perfil">
+                                <div>
+                                    <h6 class="fw-bold mb-0">Ana Paula Santos</h6>
+                                    <p class="small text-muted mb-0">Contadora Autônoma</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Testimonial 3 -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="d-flex mb-4">
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                            </div>
+                            <p class="mb-4">
+                                "Meu escritório atendia mais de 50 empresas e o custo com sistemas era muito alto. Com esta solução, automatizamos o processo de download de NF-e e ainda nos livramos de uma despesa recorrente."
+                            </p>
+                            <div class="d-flex align-items-center">
+                                <img src="https://via.placeholder.com/50" class="rounded-circle me-3" alt="Foto de perfil">
+                                <div>
+                                    <h6 class="fw-bold mb-0">Ricardo Mendes</h6>
+                                    <p class="small text-muted mb-0">Diretor, Mendes Associados</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="py-5 bg-light" id="faq">
+        <div class="container py-5">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold mb-3">Perguntas Frequentes</h2>
+                <p class="lead text-muted mx-auto" style="max-width: 700px;">
+                    Tire suas dúvidas sobre nossa solução gratuita para baixar NF-e.
+                </p>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="accordion" id="faqAccordion">
+                        <!-- Question 1 -->
+                        <div class="accordion-item border-0 mb-3 shadow-sm">
+                            <h3 class="accordion-header">
+                                <button class="accordion-button fw-bold rounded" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                    É realmente 100% gratuito? Não tem nenhum custo escondido?
+                                </button>
+                            </h3>
+                            <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Sim, nossa solução é completamente gratuita e open-source. Não existem custos escondidos, mensalidades ou restrições de uso. O código está disponível no GitHub para qualquer pessoa usar, modificar e distribuir livremente.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Question 2 -->
+                        <div class="accordion-item border-0 mb-3 shadow-sm">
+                            <h3 class="accordion-header">
+                                <button class="accordion-button collapsed fw-bold rounded" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                    Quais requisitos técnicos preciso ter para usar?
+                                </button>
+                            </h3>
+                            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Você precisa ter Python instalado em seu computador (versão 3.7 ou superior). Os demais requisitos são instalados automaticamente quando você executa o comando <code>pip install -r requirements.txt</code>. O sistema funciona em Windows, Linux e macOS.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Question 3 -->
+                        <div class="accordion-item border-0 mb-3 shadow-sm">
+                            <h3 class="accordion-header">
+                                <button class="accordion-button collapsed fw-bold rounded" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                    A ferramenta é segura? Como são tratados os dados?
+                                </button>
+                            </h3>
+                            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    A ferramenta é totalmente segura. Todo o processamento é feito localmente em seu computador, sem enviar dados para servidores externos. As chaves de NF-e são armazenadas apenas localmente e você tem total controle sobre os arquivos baixados. Por ser open-source, o código pode ser auditado por qualquer pessoa.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Question 4 -->
+                        <div class="accordion-item border-0 mb-3 shadow-sm">
+                            <h3 class="accordion-header">
+                                <button class="accordion-button collapsed fw-bold rounded" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                                    Como obtenho suporte se tiver problemas?
+                                </button>
+                            </h3>
+                            <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Por ser um projeto de código aberto, você pode abrir issues no GitHub para reportar problemas ou solicitar melhorias. Existe também uma comunidade ativa de usuários que podem ajudar com dúvidas e dificuldades. Para problemas urgentes, você também pode entrar em contato conosco diretamente.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Question 5 -->
+                        <div class="accordion-item border-0 mb-3 shadow-sm">
+                            <h3 class="accordion-header">
+                                <button class="accordion-button collapsed fw-bold rounded" type="button" data-bs-toggle="collapse" data-bs-target="#faq5">
+                                    Posso integrar esta solução com meu sistema contábil?
+                                </button>
+                            </h3>
+                            <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Sim! Por ser open-source, o código pode ser modificado para integrar com outros sistemas. Os arquivos XML baixados são padrão e podem ser importados na maioria dos sistemas contábeis. Além disso, desenvolvedores podem estender a funcionalidade para criar integrações específicas com ERPs e sistemas contábeis.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Question 6 - Community Support -->
+                        <div class="accordion-item border-0 mb-3 shadow-sm">
+                            <h3 class="accordion-header">
+                                <button class="accordion-button collapsed fw-bold rounded" type="button" data-bs-toggle="collapse" data-bs-target="#faq6">
+                                    Existe alguma comunidade onde posso tirar dúvidas?
+                                </button>
+                            </h3>
+                            <div id="faq6" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Sim! Temos comunidades ativas no WhatsApp e Telegram onde você pode tirar dúvidas, compartilhar experiências e receber suporte de outros usuários e desenvolvedores:
+                                    <div class="mt-3">
+                                        <a href="https://t.me/+3C-VmF10sdc3NDQx" target="_blank" class="btn btn-outline-primary me-2">
+                                            <i class="fab fa-telegram me-2"></i>Grupo no Telegram
+                                        </a>
+                                        <a href="https://chat.whatsapp.com/ILr0uOla1Ar6t0i0xpr69J" target="_blank" class="btn btn-outline-success">
+                                            <i class="fab fa-whatsapp me-2"></i>Grupo no WhatsApp
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download Section -->
+    <section class="py-5" id="download">
+        <div class="container py-5">
+            <div class="row">
+                <div class="col-lg-10 col-xl-8 mx-auto">
+                    <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                        <div class="row g-0">
+                            <div class="col-md-5 bg-primary text-white p-5 d-flex flex-column justify-content-center">
+                                <h2 class="fw-bold mb-3">Baixe Agora e Economize</h2>
+                                <p class="mb-4">
+                                    Acesse todas as NF-e de saída dos seus clientes sem gastar 
+                                    com sistemas pagos. Solução ideal para contadores e escritórios contábeis.
+                                </p>
+                                <ul class="list-unstyled mb-0">
+                                    <li class="mb-2 d-flex align-items-center">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        <span>100% Gratuito</span>
+                                    </li>
+                                    <li class="mb-2 d-flex align-items-center">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        <span>Código Aberto</span>
+                                    </li>
+                                    <li class="mb-2 d-flex align-items-center">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        <span>Instalação Simples</span>
+                                    </li>
+                                    <li class="d-flex align-items-center">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        <span>Sem Limites de Uso</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-md-7 p-5">
+                                <h3 class="fw-bold mb-4">Acesse o Projeto</h3>
+                                <p class="mb-4">
+                                    Clone o repositório diretamente do GitHub ou baixe como arquivo ZIP 
+                                    para começar a usar imediatamente.
+                                </p>
+                                <div class="mb-4 p-3 bg-light rounded">
+                                    <code style="font-family: monospace;">
+                                        git clone https://github.com/braulliomarques/nfe-consulta-api.git
+                                    </code>
+                                </div>
+                                <div class="d-grid gap-2">
+                                    <a href="https://github.com/braulliomarques/nfe-consulta-api" class="btn btn-primary btn-lg">
+                                        <i class="fab fa-github me-2"></i> Ver no GitHub
+                                    </a>
+                                    <a href="https://github.com/braulliomarques/nfe-consulta-api/archive/refs/heads/main.zip" class="btn btn-outline-primary btn-lg">
+                                        <i class="fas fa-download me-2"></i> Download ZIP
+                                    </a>
+                                </div>
+                                <p class="text-muted small mt-3 mb-0">
+                                    Ao baixar, você concorda com os termos da licença MIT.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Section -->
+    <section class="py-5 bg-light" id="demo">
+        <div class="container py-5">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold mb-3">Veja como é simples</h2>
+                <p class="lead text-muted mx-auto" style="max-width: 700px;">
+                    Confira a demonstração do funcionamento da ferramenta em menos de 2 minutos.
+                </p>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-10 mx-auto">
+                    <div class="ratio ratio-16x9 shadow-lg rounded overflow-hidden">
+                        <iframe width="560" height="315" src="https://www.youtube.com/embed/v2npAQqW0GM?si=BRHTqNf55_zg0jDm" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-5 bg-primary text-white">
+        <div class="container py-4">
+            <div class="row align-items-center">
+                <div class="col-lg-8 mb-4 mb-lg-0">
+                    <h3 class="fw-bold mb-2">As empresas de software não querem que você faça isso...</h3>
+                    <p class="mb-0">Pare de pagar mensalidades! Baixe agora nosso projeto completo e tenha sua própria ferramenta de NF-e.</p>
+                </div>
+                <div class="col-lg-4 text-lg-end">
+                    <a href="#download" class="btn btn-light btn-lg">
+                        <i class="fas fa-download me-2"></i> Baixar Gratuitamente
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-5 bg-dark text-white">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4 mb-4 mb-lg-0">
+                    <h5 class="fw-bold mb-3">NFe Livre</h5>
+                    <p class="mb-3">
+                        Solução gratuita e open-source para download de NF-e, 
+                        desenvolvida para contadores e profissionais contábeis.
+                    </p>
+                    <div class="d-flex gap-2">
+                        <a href="https://github.com/braulliomarques/nfe-consulta-api" class="text-white">
+                            <i class="fab fa-github fa-lg"></i>
+                        </a>
+                        <a href="#" class="text-white">
+                            <i class="fab fa-linkedin fa-lg"></i>
+                        </a>
+                        <a href="#" class="text-white">
+                            <i class="fab fa-twitter fa-lg"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-2 mb-4 mb-lg-0">
+                    <h6 class="fw-bold mb-3">Links</h6>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2"><a href="#beneficios" class="text-white text-decoration-none">Benefícios</a></li>
+                        <li class="mb-2"><a href="#como-funciona" class="text-white text-decoration-none">Como Funciona</a></li>
+                        <li class="mb-2"><a href="#getting-started" class="text-white text-decoration-none">Começando a Usar</a></li>
+                        <li class="mb-2"><a href="#depoimentos" class="text-white text-decoration-none">Depoimentos</a></li>
+                        <li><a href="#faq" class="text-white text-decoration-none">Perguntas Frequentes</a></li>
+                    </ul>
+                </div>
+                <div class="col-sm-6 col-lg-3 mb-4 mb-lg-0">
+                    <h6 class="fw-bold mb-3">Recursos</h6>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2"><a href="#" class="text-white text-decoration-none">Documentação</a></li>
+                        <li class="mb-2"><a href="#" class="text-white text-decoration-none">Guia de Instalação</a></li>
+                        <li class="mb-2"><a href="#" class="text-white text-decoration-none">API</a></li>
+                        <li><a href="#" class="text-white text-decoration-none">Suporte</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3">
+                    <h6 class="fw-bold mb-3">Contato</h6>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2"><i class="fas fa-envelope me-2"></i> contato@nfelivre.com.br</li>
+                        <li class="mb-2"><i class="fas fa-phone me-2"></i> (11) 9 1234-5678</li>
+                        <li class="mb-2"><i class="fas fa-map-marker-alt me-2"></i> São Paulo, SP</li>
+                        <li class="mb-2">
+                            <a href="https://t.me/+3C-VmF10sdc3NDQx" target="_blank" class="text-white text-decoration-none">
+                                <i class="fab fa-telegram me-2"></i> Comunidade no Telegram
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://chat.whatsapp.com/ILr0uOla1Ar6t0i0xpr69J" target="_blank" class="text-white text-decoration-none">
+                                <i class="fab fa-whatsapp me-2"></i> Comunidade no WhatsApp
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="row">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <p class="mb-0 small">© 2023 NFe Livre. Todos os direitos reservados.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="#" class="text-white text-decoration-none small me-3">Termos de Uso</a>
+                    <a href="#" class="text-white text-decoration-none small">Política de Privacidade</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 
