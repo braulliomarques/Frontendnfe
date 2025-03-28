@@ -93,7 +93,7 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav me-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="#beneficios">Benefícios</a>
                     </li>
@@ -109,10 +109,18 @@
                     <li class="nav-item">
                         <a class="nav-link" href="#faq">Perguntas Frequentes</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="btn btn-primary ms-lg-3" href="#download">Baixar Agora</a>
-                    </li>
                 </ul>
+                <div class="d-flex gap-2">
+                    <a href="https://t.me/+3C-VmF10sdc3NDQx" target="_blank" class="btn btn-outline-primary">
+                        <i class="fab fa-telegram me-2"></i>Telegram
+                    </a>
+                    <a href="https://chat.whatsapp.com/ILr0uOla1Ar6t0i0xpr69J" target="_blank" class="btn btn-outline-success">
+                        <i class="fab fa-whatsapp me-2"></i>WhatsApp
+                    </a>
+                    <a href="#download" class="btn btn-primary">
+                        <i class="fas fa-download me-2"></i>Baixar Agora
+                    </a>
+                </div>
             </div>
         </div>
     </nav>
@@ -145,6 +153,28 @@
                             </p>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Community Section -->
+    <section class="py-3 bg-light">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8 mb-3 mb-lg-0">
+                    <p class="mb-0 text-center text-lg-start">
+                        <i class="fas fa-users me-2 text-primary"></i>
+                        Junte-se à nossa comunidade e receba suporte, atualizações e dicas de uso!
+                    </p>
+                </div>
+                <div class="col-lg-4 text-center text-lg-end">
+                    <a href="https://t.me/+3C-VmF10sdc3NDQx" target="_blank" class="btn btn-outline-primary me-2">
+                        <i class="fab fa-telegram me-2"></i>Grupo no Telegram
+                    </a>
+                    <a href="https://chat.whatsapp.com/ILr0uOla1Ar6t0i0xpr69J" target="_blank" class="btn btn-outline-success">
+                        <i class="fab fa-whatsapp me-2"></i>Grupo no WhatsApp
+                    </a>
                 </div>
             </div>
         </div>
@@ -233,7 +263,7 @@
             <div class="text-center mb-5">
                 <h2 class="fw-bold mb-3">Como Funciona</h2>
                 <p class="lead text-muted mx-auto" style="max-width: 700px;">
-                    Nosso sistema é simples e intuitivo. Em apenas 3 passos você terá acesso a todas as NF-e dos seus clientes.
+                    Nosso sistema é simples e intuitivo. Comece baixando os componentes necessários.
                 </p>
             </div>
             
@@ -241,80 +271,22 @@
                 <div class="col-lg-10 mx-auto">
                     <div class="row g-5">
                         <!-- Step 1 -->
-                        <div class="col-md-4">
+                        <div class="col-md-12">
                             <div class="text-center">
                                 <div class="rounded-circle bg-primary text-white d-inline-flex justify-content-center align-items-center mb-4" style="width: 60px; height: 60px;">
                                     <span class="fs-4 fw-bold">1</span>
                                 </div>
-                                <h4 class="fw-bold mb-3">Baixe o Projeto</h4>
+                                <h4 class="fw-bold mb-3">Baixe os Projetos</h4>
                                 <p class="text-muted">
-                                    Faça o download direto do arquivo ZIP e extraia em seu computador.
+                                    Faça o download dos dois componentes necessários: Interface e API, e extraia ambos em uma pasta.
                                 </p>
-                                <div class="mt-3 p-3 bg-white rounded shadow-sm" style="font-family: monospace; text-align: center;">
-                                    <a href="https://github.com/braulliomarques/nfe-consulta-api/archive/refs/heads/main.zip" class="btn btn-primary">
-                                        <i class="fas fa-download me-2"></i> Baixar Projeto
+                                <div class="mt-3 p-3 bg-white rounded shadow-sm">
+                                    <a href="https://github.com/braulliomarques/Frontendnfe/archive/refs/heads/main.zip" class="btn btn-primary mb-2 w-100">
+                                        <i class="fas fa-download me-2"></i> Download Interface
                                     </a>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Step 2 -->
-                        <div class="col-md-4">
-                            <div class="text-center">
-                                <div class="rounded-circle bg-primary text-white d-inline-flex justify-content-center align-items-center mb-4" style="width: 60px; height: 60px;">
-                                    <span class="fs-4 fw-bold">2</span>
-                                </div>
-                                <h4 class="fw-bold mb-3">Instale as Dependências</h4>
-                                <p class="text-muted">
-                                    Instale os requisitos necessários usando o gerenciador de pacotes pip.
-                                </p>
-                                <div class="mt-3 p-3 bg-white rounded shadow-sm" style="font-family: monospace; text-align: left;">
-                                    <code>pip install -r requirements.txt</code>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Step 3 -->
-                        <div class="col-md-4">
-                            <div class="text-center">
-                                <div class="rounded-circle bg-primary text-white d-inline-flex justify-content-center align-items-center mb-4" style="width: 60px; height: 60px;">
-                                    <span class="fs-4 fw-bold">3</span>
-                                </div>
-                                <h4 class="fw-bold mb-3">Execute e Use</h4>
-                                <p class="text-muted">
-                                    Inicie a aplicação e insira as chaves de NF-e para baixar os documentos em XML.
-                                </p>
-                                <div class="mt-3 p-3 bg-white rounded shadow-sm" style="font-family: monospace; text-align: left;">
-                                    <code>python app.py</code>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-5 pt-4 text-center">
-                        <div class="p-4 bg-white rounded-3 shadow-sm d-inline-block">
-                            <h4 class="fw-bold mb-3">Fluxo de Funcionamento</h4>
-                            <div class="d-flex justify-content-center">
-                                <div class="d-flex align-items-center">
-                                    <div class="text-center px-3">
-                                        <i class="fas fa-key fa-2x text-primary mb-2"></i>
-                                        <p class="small mb-0">Chave da NFe</p>
-                                    </div>
-                                    <i class="fas fa-arrow-right mx-3 text-muted"></i>
-                                    <div class="text-center px-3">
-                                        <i class="fas fa-search fa-2x text-primary mb-2"></i>
-                                        <p class="small mb-0">Consulta</p>
-                                    </div>
-                                    <i class="fas fa-arrow-right mx-3 text-muted"></i>
-                                    <div class="text-center px-3">
-                                        <i class="fas fa-file-download fa-2x text-primary mb-2"></i>
-                                        <p class="small mb-0">Download XML</p>
-                                    </div>
-                                    <i class="fas fa-arrow-right mx-3 text-muted"></i>
-                                    <div class="text-center px-3">
-                                        <i class="fas fa-file-invoice fa-2x text-primary mb-2"></i>
-                                        <p class="small mb-0">Importação</p>
-                                    </div>
+                                    <a href="https://github.com/braulliomarques/nfe-consulta-api/archive/refs/heads/main.zip" class="btn btn-outline-primary w-100">
+                                        <i class="fas fa-download me-2"></i> Download API
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -330,7 +302,7 @@
             <div class="text-center mb-5">
                 <h2 class="fw-bold mb-3">Começando a Usar</h2>
                 <p class="lead text-muted mx-auto" style="max-width: 700px;">
-                    Após instalar e executar a API, siga estas etapas para começar a baixar seus XMLs.
+                    Para usar nosso sistema, você precisará instalar algumas ferramentas essenciais.
                 </p>
             </div>
             
@@ -340,76 +312,37 @@
                         <div class="card-body p-4">
                             <div class="d-flex align-items-center mb-4">
                                 <div class="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center me-3" style="width: 50px; height: 50px;">
-                                    <i class="fas fa-desktop fa-lg"></i>
+                                    <i class="fas fa-tools fa-lg"></i>
                                 </div>
-                                <h4 class="fw-bold mb-0">Acessando a Interface</h4>
-                            </div>
-                            <p class="mb-4">
-                                Depois de executar o servidor da API,  a API estará rodando localmente no seu computador. 
-                                Para começar a usar, acesso o app no botão abaixo:
-                            </p>
-                            <ol class="mb-4">
-
-                                <li class="mb-3">
-                                    <strong>Você será direcionado para a página principal</strong> - Onde poderá inserir as chaves de NF-e e baixar os XMLs.
-                                </li>
-                            </ol>
-                            <div class="text-center mt-4">
-                                <a href="/consulta" class="btn btn-primary btn-lg">
-                                    <i class="fas fa-external-link-alt me-2"></i>Acessar Interface Principal
-                                </a>
-                                <p class="text-muted small mt-2">
-                                    Certifique-se de que a API esteja rodando antes de clicar no botão acima.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="card border-0 shadow-lg rounded-3 overflow-hidden mb-5">
-                        <div class="card-body p-4">
-                            <h4 class="fw-bold mb-3 text-center">Interface Principal</h4>
-                            <p class="text-center text-muted mb-4">
-                                Na página principal você verá uma lista com suas chaves de NF-e e poderá baixar os XMLs individualmente ou em massa.
-                            </p>
-                            <div class="text-center">
-                                <img src="https://via.placeholder.com/800x400?text=Interface+do+Sistema" alt="Interface do Sistema" class="img-fluid rounded shadow-sm">
-                                <p class="text-muted small mt-3">
-                                    Interface onde você poderá ver e baixar suas NF-e em formato XML.
-                                </p>
+                                <h4 class="fw-bold mb-0">Instalando as Ferramentas Necessárias</h4>
                             </div>
                             
-                            <div class="row mt-4">
-                                <div class="col-md-6">
-                                    <h5 class="fw-bold mb-3"><i class="fas fa-check-circle text-primary me-2"></i>Funcionalidades</h5>
-                                    <ul class="list-unstyled">
-                                        <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i>Visualizar todas as chaves NFe cadastradas</li>
-                                        <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i>Baixar XML individual por chave</li>
-                                        <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i>Baixar todos os XMLs de uma vez</li>
-                                        <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i>Verificar status de cada download</li>
-                                        <li><i class="fas fa-arrow-right text-primary me-2"></i>Gerenciar cache para consultas mais rápidas</li>
-                                    </ul>
-                                </div>
-                                <div class="col-md-6">
-                                    <h5 class="fw-bold mb-3"><i class="fas fa-lightbulb text-primary me-2"></i>Dicas de Uso</h5>
-                                    <ul class="list-unstyled">
-                                        <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i>Mantenha o arquivo nfe_keys.txt atualizado</li>
-                                        <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i>Use o botão "Baixar Todos os XMLs" para processamento em lote</li>
-                                        <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i>Clique em "Limpar Cache" se precisar atualizar os dados</li>
-                                        <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i>Observe a barra de progresso durante downloads em massa</li>
-                                        <li><i class="fas fa-arrow-right text-primary me-2"></i>Acompanhe o status de cada chave na tabela principal</li>
-                                    </ul>
-                                </div>
+                            <div class="mb-4">
+                                <h5 class="fw-bold mb-3">1. Instalando Python</h5>
+                                <ol class="mb-4">
+                                    <li class="mb-2">Baixe em: <a href="https://www.python.org/downloads/release/python-3120/" target="_blank">https://www.python.org/downloads/release/python-3120/</a></li>
+                                    <li class="mb-2">Antes de clicar em "Install Now", marque: ✅ <strong>Add Python to PATH</strong></li>
+                                    <li class="mb-2">Após instalar, abra o terminal e execute:
+                                        <pre class="bg-light p-2 rounded mt-2"><code>python.exe -m pip install --upgrade pip</code></pre>
+                                    </li>
+                                </ol>
+
+                                <h5 class="fw-bold mb-3">2. Configurando o PowerShell</h5>
+                                <p class="mb-4">Abra o PowerShell como <strong>administrador</strong> e execute:</p>
+                                <pre class="bg-light p-2 rounded mb-4"><code>Set-ExecutionPolicy RemoteSigned</code></pre>
+
+                                <h5 class="fw-bold mb-3">3. Instalando Node.js</h5>
+                                <ol class="mb-4">
+                                    <li class="mb-2">Baixe em: <a href="https://nodejs.org/" target="_blank">https://nodejs.org/</a></li>
+                                    <li class="mb-2">Escolha a versão LTS (Long Term Support)</li>
+                                    <li class="mb-2">Instale normalmente</li>
+                                </ol>
                             </div>
-                        </div>
-                    </div>
-                    
-                    <div class="text-center">
-                        <div class="bg-light p-4 rounded-3 d-inline-block">
-                            <h5 class="fw-bold mb-3">Dica: Adicione suas chaves de NF-e</h5>
-                            <p class="mb-0">
-                                Você pode adicionar suas chaves de NF-e diretamente no arquivo <code>nfe_keys.txt</code>, uma por linha, 
-                                para facilitar o processo de consulta em massa.
-                            </p>
+
+                            <div class="alert alert-info">
+                                <h5 class="fw-bold mb-2">Próximos Passos</h5>
+                                <p class="mb-0">Agora que você tem todas as ferramentas instaladas, acesse cada projeto individualmente e siga as orientações do README.md em cada pasta.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -649,18 +582,21 @@
                                 </ul>
                             </div>
                             <div class="col-md-7 p-5">
-                                <h3 class="fw-bold mb-4">Baixe o Projeto</h3>
+                                <h3 class="fw-bold mb-4">Baixe os Projetos</h3>
                                 <p class="mb-4">
-                                    Faça o download direto do arquivo ZIP para começar a usar imediatamente.
-                                    Não é necessário acessar o GitHub ou ter conhecimentos em Git.
+                                    Para usar nosso sistema, você precisa baixar dois componentes: a Interface e a API.
+                                    Faça o download de ambos e extraia em uma pasta de sua preferência.
                                 </p>
                                 <div class="d-grid gap-2">
-                                    <a href="https://github.com/braulliomarques/nfe-consulta-api/archive/refs/heads/main.zip" class="btn btn-primary btn-lg">
-                                        <i class="fas fa-download me-2"></i> Download Direto (ZIP)
+                                    <a href="https://github.com/braulliomarques/Frontendnfe/archive/refs/heads/main.zip" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-download me-2"></i> Download Interface
+                                    </a>
+                                    <a href="https://github.com/braulliomarques/nfe-consulta-api/archive/refs/heads/main.zip" class="btn btn-outline-primary btn-lg">
+                                        <i class="fas fa-download me-2"></i> Download API
                                     </a>
                                 </div>
                                 <p class="text-muted small mt-3 mb-0">
-                                    Ao baixar, você concorda com os termos da licença MIT.
+                                    Após baixar, extraia ambos os arquivos em uma pasta de sua preferência.
                                 </p>
                             </div>
                         </div>
