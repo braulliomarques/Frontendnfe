@@ -74,6 +74,24 @@
         .cnpj-cell {
             font-family: monospace;
         }
+        .ano-mes-cell {
+            font-weight: 500;
+            color: #666;
+        }
+        .uf-cell {
+            font-weight: 600;
+            color: #444;
+        }
+        .numero-cell {
+            font-family: monospace;
+            color: #555;
+        }
+        .table th {
+            white-space: nowrap;
+        }
+        .table td {
+            vertical-align: middle;
+        }
     </style>
 </head>
 <body>
@@ -177,9 +195,35 @@
 
                 <div class="d-flex mb-3 align-items-center">
                     <div class="input-group me-3" style="max-width: 300px;">
-                        <span class="input-group-text"><i class="fas fa-search"></i></span>
-                        <input type="text" class="form-control" id="cnpjFilter" placeholder="Filtrar por CNPJ">
+                        <span class="input-group-text"><i class="fas fa-building"></i></span>
+                        <select class="form-select" id="cnpjFilter">
+                            <option value="">Todos os CNPJs</option>
+                            {% set cnpjs = [] %}
+                            {% for key in keys %}
+                                {% if key[6:20] not in cnpjs %}
+                                    {% set _ = cnpjs.append(key[6:20]) %}
+                                    <option value="{{ key[6:20] }}">{{ key[6:20] }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
                         <button class="btn btn-outline-secondary" type="button" onclick="clearCNPJFilter()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="input-group me-3" style="max-width: 200px;">
+                        <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                        <select class="form-select" id="dateFilter">
+                            <option value="">Todos os Períodos</option>
+                            {% set periodos = [] %}
+                            {% for key in keys %}
+                                {% set periodo = "20" + key[2:4] + "/" + key[4:6] %}
+                                {% if periodo not in periodos %}
+                                    {% set _ = periodos.append(periodo) %}
+                                    <option value="{{ periodo }}">{{ periodo }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        <button class="btn btn-outline-secondary" type="button" onclick="clearDateFilter()">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
@@ -188,11 +232,15 @@
                             <i class="fas fa-tasks"></i>
                         </span>
                         <select class="form-select" id="concurrencyLimit" aria-label="Limite de processamento simultâneo">
+                            <option value="2">2 chaves simultâneas</option>
                             <option value="5">5 chaves simultâneas</option>
                             <option value="10" selected>10 chaves simultâneas</option>
                             <option value="15">15 chaves simultâneas</option>
                             <option value="20">20 chaves simultâneas</option>
                             <option value="30">30 chaves simultâneas</option>
+                            <option value="50">50 chaves simultâneas</option>
+                            <option value="80">80 chaves simultâneas</option>
+                            <option value="100">100 chaves simultâneas</option>
                         </select>
                         <button class="btn btn-outline-secondary" type="button" data-bs-toggle="popover" data-bs-placement="bottom" 
                                 title="Ajuste de Concorrência" 
@@ -218,6 +266,9 @@
                         <thead>
                             <tr>
                                 <th>CNPJ</th>
+                                <th>Ano/Mês</th>
+                                <th>UF</th>
+                                <th>Número NF</th>
                                 <th>Chave NFE</th>
                                 <th>Status</th>
                                 <th>Ações</th>
@@ -227,6 +278,9 @@
                             {% for key in keys %}
                             <tr data-cnpj="{{ key[6:20] }}" class="key-row">
                                 <td class="cnpj-cell">{{ key[6:20]|default('N/A') }}</td>
+                                <td class="ano-mes-cell">{{ "20" + key[2:4] + "/" + key[4:6] }}</td>
+                                <td class="uf-cell">{{ key[0:2] }}</td>
+                                <td class="numero-cell">{{ key[25:34] }}</td>
                                 <td class="key-cell">{{ key }}</td>
                                 <td class="status-cell" id="status-{{ key }}">
                                     {% if key in cache %}
@@ -280,12 +334,20 @@
         urlCache.set('{{ key }}', '{{ data.url }}');
         {% endfor %}
 
-        // Organize NFe keys by CNPJ when page loads
+        // Inicializa os status de processamento
         document.addEventListener('DOMContentLoaded', function() {
             organizeKeysByCNPJ();
             
+            // Restaura os status de processamento do servidor
+            {% for key, data in processing.items() %}
+            updateStatus('{{ key }}', '<i class="fas fa-spinner fa-spin"></i> Obtendo URL...', false);
+            {% endfor %}
+            
             // Add event listener for CNPJ filter
-            document.getElementById('cnpjFilter').addEventListener('input', filterKeys);
+            document.getElementById('cnpjFilter').addEventListener('change', filterKeys);
+            
+            // Add event listener for date filter
+            document.getElementById('dateFilter').addEventListener('change', filterKeys);
             
             // Restaura a configuração de concorrência salva
             const savedConcurrency = localStorage.getItem('concurrencyLimit');
@@ -347,7 +409,7 @@
                 headerRow.className = 'cnpj-group-header';
                 headerRow.setAttribute('data-cnpj', cnpj);
                 headerRow.innerHTML = `
-                    <td colspan="4">
+                    <td colspan="7">
                         <i class="fas fa-caret-right cnpj-toggle-icon"></i>
                         CNPJ: <span class="cnpj-formatted">${formattedCNPJ}</span>
                         <span class="badge bg-primary ms-2">${groupCount} chave(s)</span>
@@ -571,6 +633,19 @@
 
                 urlButton.style.display = 'none';
                 updateStatus(key, '<i class="fas fa-spinner fa-spin"></i> Obtendo URL...', false);
+                
+                // Registra o status como processando no servidor
+                await fetch('/set-processing-status', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        key: key,
+                        status: 'processing',
+                        message: 'Obtendo URL...'
+                    })
+                });
 
                 const response = await fetch(`/get-url/${key}`);
                 const data = await response.json();
@@ -579,6 +654,20 @@
                     updateStatus(key, '<i class="fas fa-check"></i> Download disponível', false, data.from_cache);
                     showUrlButton(key, data.url);
                     await fetch(`/download/${key}`);
+                    
+                    // Registra o status como concluído no servidor
+                    await fetch('/set-processing-status', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            key: key,
+                            status: 'done',
+                            message: 'Download disponível'
+                        })
+                    });
+                    
                     button.disabled = false;
                     return true;
                 } else {
@@ -586,6 +675,20 @@
                 }
             } catch (error) {
                 updateStatus(key, `<i class="fas fa-exclamation-triangle"></i> ${error.message}`, true);
+                
+                // Registra o status como erro no servidor
+                await fetch('/set-processing-status', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        key: key,
+                        status: 'error',
+                        message: error.message
+                    })
+                });
+                
                 button.disabled = false;
                 urlButton.style.display = 'none';
                 updateGlobalStatus(`Erro ao processar NFE ${key}: ${error.message}`, 'danger');
@@ -871,28 +974,17 @@
 
         function clearCNPJFilter() {
             document.getElementById('cnpjFilter').value = '';
-            
-            // Reset all rows visibility based on collapse state
-            const keyRows = document.querySelectorAll('.key-row');
-            keyRows.forEach(row => {
-                row.style.display = 'table-row';
-                row.classList.add('cnpj-group-hidden'); // Default to hidden (collapsed)
-            });
-            
-            // Reset all group headers to visible and collapsed state
-            const groupHeaders = document.querySelectorAll('.cnpj-group-header');
-            groupHeaders.forEach(header => {
-                header.style.display = 'table-row';
-                const icon = header.querySelector('.cnpj-toggle-icon');
-                icon.classList.remove('open'); // Default to collapsed
-            });
-            
-            // Restore the total count
-            document.getElementById('totalKeysCount').textContent = keyRows.length;
+            filterKeys();
+        }
+
+        function clearDateFilter() {
+            document.getElementById('dateFilter').value = '';
+            filterKeys();
         }
 
         function filterKeys() {
-            const filter = document.getElementById('cnpjFilter').value.toLowerCase();
+            const cnpjFilter = document.getElementById('cnpjFilter').value;
+            const dateFilter = document.getElementById('dateFilter').value;
             const keyRows = Array.from(document.querySelectorAll('.key-row'));
             const groupHeaders = Array.from(document.querySelectorAll('.cnpj-group-header'));
             
@@ -901,17 +993,21 @@
             
             keyRows.forEach(keyRow => {
                 const cnpjCell = keyRow.querySelector('.cnpj-cell');
-                const cnpj = cnpjCell.textContent.toLowerCase();
-                const key = keyRow.querySelector('.key-cell').textContent.toLowerCase();
+                const anoMesCell = keyRow.querySelector('.ano-mes-cell');
+                const cnpj = cnpjCell.textContent;
+                const anoMes = anoMesCell.textContent.trim();
                 
-                if (cnpj.includes(filter) || key.includes(filter) || filter === '') {
-                    // This row matches the filter
+                // Check if row matches both filters
+                const cnpjMatch = !cnpjFilter || cnpj === cnpjFilter;
+                const dateMatch = !dateFilter || anoMes === dateFilter;
+                
+                if (cnpjMatch && dateMatch) {
+                    // This row matches both filters
                     keyRow.style.display = 'table-row';
                     keyRow.classList.remove('cnpj-group-hidden'); // Make sure it's visible even if group is collapsed
                     cnpjMatches.add(keyRow.getAttribute('data-cnpj')); // Mark this CNPJ as having matches
                 } else {
-                    // This row doesn't match the filter, but keep the display property
-                    // determined by the group's collapsed state - just don't show it in the filter
+                    // This row doesn't match one or both filters
                     keyRow.style.display = 'none';
                 }
             });
@@ -919,11 +1015,11 @@
             // Then handle group headers - only show headers for groups that have matches
             groupHeaders.forEach(header => {
                 const cnpj = header.getAttribute('data-cnpj');
-                if (cnpjMatches.has(cnpj) || filter === '') {
+                if (cnpjMatches.has(cnpj) || (!cnpjFilter && !dateFilter)) {
                     header.style.display = 'table-row';
                     
                     // If filtering, ensure the toggle icon shows as expanded
-                    if (filter !== '') {
+                    if (cnpjFilter || dateFilter) {
                         const icon = header.querySelector('.cnpj-toggle-icon');
                         icon.classList.add('open');
                     }
@@ -933,8 +1029,8 @@
             });
             
             // Update UI based on filter results
-            if (filter === '') {
-                // No filter - show normal count
+            if (!cnpjFilter && !dateFilter) {
+                // No filters - show normal count
                 document.getElementById('totalKeysCount').textContent = keyRows.length;
             } else {
                 // Show filtered count
