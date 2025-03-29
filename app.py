@@ -361,12 +361,13 @@ def set_processing_status():
         # Carrega o cache existente
         processing_cache = load_processing_cache()
         
-        # Status 'done' ou 'error' remove do cache de processamento
-        if status in ['done', 'error']:
+        # Status 'done' remove do cache de processamento
+        # Status 'error' mantém no cache, apenas atualiza o status
+        if status == 'done':
             if key in processing_cache:
                 del processing_cache[key]
         else:
-            # Status 'processing' adiciona ao cache
+            # Status 'processing' ou 'error' adiciona/atualiza o cache
             processing_cache[key] = {
                 'status': status,
                 'message': message,
@@ -397,6 +398,25 @@ def get_processing_status():
     except Exception as e:
         logging.error(f"Erro ao obter status de processamento: {str(e)}")
         return jsonify({'success': False, 'message': f'Erro: {str(e)}'}), 500
+
+@app.route('/clear-processing-cache', methods=['POST'])
+def clear_processing_cache_endpoint():
+    """Endpoint para limpar o cache de processamento."""
+    try:
+        # Limpar o cache de processamento
+        processing_cache = {}
+        save_processing_cache(processing_cache)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Cache de processamento limpo com sucesso'
+        })
+    except Exception as e:
+        logging.error(f"Erro ao limpar cache de processamento: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'Erro ao limpar cache de processamento: {str(e)}'
+        }), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=5000) 

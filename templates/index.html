@@ -288,6 +288,16 @@
                                         <i class="fas fa-check"></i> Download disponível
                                         <span class="cached"><i class="fas fa-clock"></i> Em cache</span>
                                     </span>
+                                    {% elif key in processing %}
+                                    {% if processing[key].status == "processing" %}
+                                    <span class="text-info">
+                                        <i class="fas fa-spinner fa-spin"></i> {{ processing[key].message|safe }}
+                                    </span>
+                                    {% elif processing[key].status == "error" %}
+                                    <span class="text-danger">
+                                        <i class="fas fa-exclamation-triangle"></i> {{ processing[key].message|safe }}
+                                    </span>
+                                    {% endif %}
                                     {% else %}
                                     <span class="text-muted">Aguardando processamento</span>
                                     {% endif %}
@@ -318,6 +328,15 @@
                         </tbody>
                     </table>
                 </div>
+
+                <div class="card-footer text-end">
+                    <button class="btn btn-danger btn-sm" onclick="clearCache()">
+                        <i class="fas fa-trash"></i> Limpar Cache de URLs
+                    </button>
+                    <button class="btn btn-warning btn-sm" onclick="clearProcessingCache()">
+                        <i class="fas fa-trash"></i> Limpar Status de Processamento
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -340,7 +359,11 @@
             
             // Restaura os status de processamento do servidor
             {% for key, data in processing.items() %}
-            updateStatus('{{ key }}', '<i class="fas fa-spinner fa-spin"></i> Obtendo URL...', false);
+            {% if data.status == 'processing' %}
+            updateStatus('{{ key }}', '<i class="fas fa-spinner fa-spin"></i> {{ data.message|safe }}', false);
+            {% elif data.status == 'error' %}
+            updateStatus('{{ key }}', '<i class="fas fa-exclamation-triangle"></i> {{ data.message|safe }}', true);
+            {% endif %}
             {% endfor %}
             
             // Add event listener for CNPJ filter
@@ -374,7 +397,31 @@
             popoverTriggerList.map(function (popoverTriggerEl) {
                 return new bootstrap.Popover(popoverTriggerEl);
             });
+            
+            // Inicializar a verificação periódica do status de processamento
+            setInterval(checkProcessingStatus, 10000); // Verificar a cada 10 segundos
         });
+
+        // Função para verificar o status de processamento das chaves
+        async function checkProcessingStatus() {
+            try {
+                const response = await fetch('/get-processing-status');
+                const data = await response.json();
+                
+                if (data.success && data.processing) {
+                    // Atualiza o status das chaves em processamento
+                    for (const [key, status] of Object.entries(data.processing)) {
+                        if (status.status === 'processing') {
+                            updateStatus(key, '<i class="fas fa-spinner fa-spin"></i> ' + status.message, false);
+                        } else if (status.status === 'error') {
+                            updateStatus(key, '<i class="fas fa-exclamation-triangle"></i> ' + status.message, true);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Erro ao verificar status de processamento:', error);
+            }
+        }
 
         // Function to organize keys by CNPJ
         function organizeKeysByCNPJ() {
@@ -847,22 +894,39 @@
 
                 if (data.success) {
                     urlCache.clear();
-
-                    document.querySelectorAll('.url-button').forEach(btn => {
-                        btn.style.display = 'none';
-                        btn.href = '#';
-                    });
-
-                    document.querySelectorAll('.status-cell').forEach(cell => {
-                        cell.innerHTML = '<span class="text-muted">Aguardando processamento</span>';
-                    });
-
-                    updateGlobalStatus('Cache limpo com sucesso', 'success');
+                    updateGlobalStatus('Cache limpo com sucesso!', 'success');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
                 } else {
-                    throw new Error(data.message);
+                    updateGlobalStatus(`Erro ao limpar cache: ${data.message}`, 'danger');
                 }
             } catch (error) {
                 updateGlobalStatus(`Erro ao limpar cache: ${error.message}`, 'danger');
+            }
+        }
+        
+        async function clearProcessingCache() {
+            if (!confirm('Tem certeza que deseja limpar o status de processamento? Isso irá redefinir o status de todas as chaves em processamento para "Aguardando processamento".')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/clear-processing-cache', {
+                    method: 'POST'
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    updateGlobalStatus('Status de processamento limpo com sucesso!', 'success');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    updateGlobalStatus(`Erro ao limpar status de processamento: ${data.message}`, 'danger');
+                }
+            } catch (error) {
+                updateGlobalStatus(`Erro ao limpar status de processamento: ${error.message}`, 'danger');
             }
         }
 
