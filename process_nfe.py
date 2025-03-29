@@ -6,6 +6,9 @@ import json
 from datetime import datetime
 from typing import List, Dict, Tuple
 from urllib.parse import unquote
+import xml.etree.ElementTree as ET
+import zipfile
+import io
 
 # Configure logging
 log_directory = "logs"
@@ -132,7 +135,11 @@ def read_nfe_keys(filename: str) -> List[str]:
 
 def process_single_key(key: str, download_dir: str, max_retries: int = 5, retry_delay: int = 3) -> Tuple[bool, Dict]:
     """Processa uma única chave NFE e retorna tupla (sucesso, detalhes)."""
-    url = f"http://127.0.0.1:3002/api/nfe/interceptar-url/{key}"
+    # Usa o hostname atual para permitir acesso de qualquer IP local
+    api_host = os.environ.get('API_HOST', '127.0.0.1')
+    api_port = os.environ.get('API_PORT', '3002')
+    url = f"http://{api_host}:{api_port}/api/nfe/interceptar-url/{key}"
+    
     attempts = 0
     details = {
         "chave": key,

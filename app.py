@@ -16,6 +16,7 @@ logging.basicConfig(
 
 # Cache de URLs
 CACHE_FILE = 'url_cache.json'
+PROCESSING_CACHE_FILE = 'processing_cache.json'
 
 def load_cache():
     """Carrega o cache de URLs do arquivo."""
@@ -44,6 +45,24 @@ def clear_cache():
     except Exception as e:
         logging.error(f"Erro ao limpar cache: {str(e)}")
         return False
+
+def load_processing_cache():
+    """Carrega o cache de chaves em processamento."""
+    try:
+        if os.path.exists(PROCESSING_CACHE_FILE):
+            with open(PROCESSING_CACHE_FILE, 'r') as f:
+                return json.load(f)
+    except Exception as e:
+        logging.error(f"Erro ao carregar cache de processamento: {str(e)}")
+    return {}
+
+def save_processing_cache(cache_data):
+    """Salva o cache de chaves em processamento."""
+    try:
+        with open(PROCESSING_CACHE_FILE, 'w') as f:
+            json.dump(cache_data, f, indent=4)
+    except Exception as e:
+        logging.error(f"Erro ao salvar cache de processamento: {str(e)}")
 
 def read_nfe_keys(filename: str):
     """Lê as chaves de NFE do arquivo."""
@@ -105,7 +124,8 @@ def consulta():
     """Página de consulta com lista de NFEs."""
     keys = read_nfe_keys('nfe_keys.txt')
     cache = load_cache()
-    return render_template('index.html', keys=keys, cache=cache)
+    processing_cache = load_processing_cache()
+    return render_template('index.html', keys=keys, cache=cache, processing=processing_cache)
 
 @app.route('/landing')
 def landing():
@@ -325,6 +345,58 @@ def delete_all_keys():
     except Exception as e:
         logging.error(f"Erro ao remover todas as chaves: {str(e)}")
         return jsonify({'success': False, 'message': f'Erro ao remover todas as chaves: {str(e)}'}), 500
+
+@app.route('/set-processing-status', methods=['POST'])
+def set_processing_status():
+    """Endpoint para definir o status de processamento de uma chave."""
+    try:
+        data = request.json
+        key = data.get('key')
+        status = data.get('status')  # 'processing', 'done', 'error'
+        message = data.get('message', '')
+        
+        if not key or not status:
+            return jsonify({'success': False, 'message': 'Chave ou status não fornecidos'}), 400
+        
+        # Carrega o cache existente
+        processing_cache = load_processing_cache()
+        
+        # Status 'done' ou 'error' remove do cache de processamento
+        if status in ['done', 'error']:
+            if key in processing_cache:
+                del processing_cache[key]
+        else:
+            # Status 'processing' adiciona ao cache
+            processing_cache[key] = {
+                'status': status,
+                'message': message,
+                'timestamp': datetime.now().isoformat()
+            }
+        
+        # Salva o cache atualizado
+        save_processing_cache(processing_cache)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Status de processamento atualizado'
+        })
+        
+    except Exception as e:
+        logging.error(f"Erro ao atualizar status de processamento: {str(e)}")
+        return jsonify({'success': False, 'message': f'Erro: {str(e)}'}), 500
+
+@app.route('/get-processing-status', methods=['GET'])
+def get_processing_status():
+    """Endpoint para obter o status de processamento de todas as chaves."""
+    try:
+        processing_cache = load_processing_cache()
+        return jsonify({
+            'success': True,
+            'processing': processing_cache
+        })
+    except Exception as e:
+        logging.error(f"Erro ao obter status de processamento: {str(e)}")
+        return jsonify({'success': False, 'message': f'Erro: {str(e)}'}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=5000) 
