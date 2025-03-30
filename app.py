@@ -399,6 +399,19 @@ def get_processing_status():
         logging.error(f"Erro ao obter status de processamento: {str(e)}")
         return jsonify({'success': False, 'message': f'Erro: {str(e)}'}), 500
 
+@app.route('/get-url-cache', methods=['GET'])
+def get_url_cache():
+    """Endpoint para obter o cache de URLs."""
+    try:
+        cache = load_cache()
+        return jsonify({
+            'success': True,
+            'cache': cache
+        })
+    except Exception as e:
+        logging.error(f"Erro ao obter cache de URLs: {str(e)}")
+        return jsonify({'success': False, 'message': f'Erro: {str(e)}'}), 500
+
 @app.route('/clear-processing-cache', methods=['POST'])
 def clear_processing_cache_endpoint():
     """Endpoint para limpar o cache de processamento."""

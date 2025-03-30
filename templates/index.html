@@ -353,9 +353,22 @@
         urlCache.set('{{ key }}', '{{ data.url }}');
         {% endfor %}
 
+        // Configuração de verificação periódica do cache
+        let cacheCheckInterval;
+        
         // Inicializa os status de processamento
         document.addEventListener('DOMContentLoaded', function() {
-            organizeKeysByCNPJ();
+            // Verifica se a função existe antes de chamá-la
+            if (typeof organizeKeysByCNPJ === 'function') {
+                organizeKeysByCNPJ();
+            } else {
+                console.warn('Função organizeKeysByCNPJ não está definida. Reagrupamento por CNPJ desativado.');
+                // Atualiza contador de chaves mesmo sem o agrupamento
+                const keyRows = document.querySelectorAll('.key-row');
+                if (keyRows.length > 0) {
+                    document.getElementById('totalKeysCount').textContent = keyRows.length;
+                }
+            }
             
             // Restaura os status de processamento do servidor
             {% for key, data in processing.items() %}
@@ -365,7 +378,7 @@
             updateStatus('{{ key }}', '<i class="fas fa-exclamation-triangle"></i> {{ data.message|safe }}', true);
             {% endif %}
             {% endfor %}
-            
+
             // Add event listener for CNPJ filter
             document.getElementById('cnpjFilter').addEventListener('change', filterKeys);
             
@@ -378,131 +391,142 @@
                 document.getElementById('concurrencyLimit').value = savedConcurrency;
             }
             
-            // Adiciona listener para salvar a configuração quando alterada
-            document.getElementById('concurrencyLimit').addEventListener('change', function() {
-                localStorage.setItem('concurrencyLimit', this.value);
-                
-                // Exibe mensagem de confirmação temporária
-                const currentValue = parseInt(this.value, 10);
-                updateGlobalStatus(`Configuração atualizada: ${currentValue} chaves serão processadas simultaneamente`, 'info');
-            });
-            
             // Inicializa tooltips e popovers do Bootstrap
-            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            tooltipTriggerList.map(function (tooltipTriggerEl) {
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+            const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => {
                 return new bootstrap.Tooltip(tooltipTriggerEl);
             });
             
-            const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
-            popoverTriggerList.map(function (popoverTriggerEl) {
+            const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
+            const popoverList = [...popoverTriggerList].map(popoverTriggerEl => {
                 return new bootstrap.Popover(popoverTriggerEl);
             });
+
+            // Iniciar a verificação periódica do cache a cada 5 segundos
+            startCacheCheck();
             
             // Inicializar a verificação periódica do status de processamento
+            checkProcessingStatus(); // Verificar imediatamente
             setInterval(checkProcessingStatus, 10000); // Verificar a cada 10 segundos
         });
+        
+        // Função para iniciar verificação periódica do cache
+        function startCacheCheck() {
+            if (!cacheCheckInterval) {
+                cacheCheckInterval = setInterval(checkUrlCache, 5000);
+                console.log("Iniciada verificação periódica do cache");
+            }
+        }
+        
+        // Função para parar verificação periódica do cache
+        function stopCacheCheck() {
+            if (cacheCheckInterval) {
+                clearInterval(cacheCheckInterval);
+                cacheCheckInterval = null;
+                console.log("Interrompida verificação periódica do cache");
+            }
+        }
 
-        // Função para verificar o status de processamento das chaves
-        async function checkProcessingStatus() {
+        // Função para verificar o cache de URLs no servidor e atualizar a interface
+        async function checkUrlCache() {
             try {
-                const response = await fetch('/get-processing-status');
+                const response = await fetch('/get-url-cache');
                 const data = await response.json();
                 
-                if (data.success && data.processing) {
-                    // Atualiza o status das chaves em processamento
-                    for (const [key, status] of Object.entries(data.processing)) {
-                        if (status.status === 'processing' || status.status === 'retry') {
-                            updateStatus(key, '<i class="fas fa-spinner fa-spin"></i> ' + status.message, false);
-                        } else if (status.status === 'error') {
-                            updateStatus(key, '<i class="fas fa-exclamation-triangle"></i> ' + status.message, true);
+                if (data.success) {
+                    // Para cada URL no cache do servidor
+                    for (const [key, cacheData] of Object.entries(data.cache)) {
+                        const url = cacheData.url;
+                        
+                        // Se não temos essa URL no cache local ou o botão não está visível
+                        const urlButton = document.getElementById(`url-btn-${key}`);
+                        if (urlButton && (urlButton.style.display === 'none' || !urlCache.has(key))) {
+                            console.log(`Atualizando cache para chave ${key}`);
+                            // Atualiza o status e mostra o botão
+                            updateStatus(key, '<i class="fas fa-check"></i> Download disponível', false, true);
+                            showUrlButton(key, url);
                         }
                     }
                 }
             } catch (error) {
-                console.error('Erro ao verificar status de processamento:', error);
+                console.error("Erro ao verificar cache:", error);
             }
         }
 
-        // Function to organize keys by CNPJ
-        function organizeKeysByCNPJ() {
-            const table = document.getElementById('nfe-keys-table');
-            const rows = Array.from(table.querySelectorAll('tr.key-row'));
+        function filterKeys() {
+            const cnpjFilter = document.getElementById('cnpjFilter').value;
+            const dateFilter = document.getElementById('dateFilter').value;
+            const keyRows = Array.from(document.querySelectorAll('.key-row'));
+            const groupHeaders = Array.from(document.querySelectorAll('.cnpj-group-header'));
             
-            if (rows.length === 0) return;
+            // First, handle all key rows
+            const cnpjMatches = new Set(); // Keep track of which CNPJs match the filter
             
-            // Update total keys count
-            document.getElementById('totalKeysCount').textContent = rows.length;
-            
-            // Remove all rows from the table
-            rows.forEach(row => row.remove());
-            
-            // Group rows by CNPJ
-            const cnpjGroups = {};
-            rows.forEach(row => {
-                const cnpj = row.getAttribute('data-cnpj');
-                if (!cnpjGroups[cnpj]) {
-                    cnpjGroups[cnpj] = [];
+            keyRows.forEach(keyRow => {
+                const cnpjCell = keyRow.querySelector('.cnpj-cell');
+                const anoMesCell = keyRow.querySelector('.ano-mes-cell');
+                const cnpj = cnpjCell.textContent;
+                const anoMes = anoMesCell.textContent.trim();
+                
+                // Check if row matches both filters
+                const cnpjMatch = !cnpjFilter || cnpj === cnpjFilter;
+                const dateMatch = !dateFilter || anoMes === dateFilter;
+                
+                if (cnpjMatch && dateMatch) {
+                    // This row matches both filters
+                    keyRow.style.display = 'table-row';
+                    keyRow.classList.remove('cnpj-group-hidden'); // Make sure it's visible even if group is collapsed
+                    cnpjMatches.add(keyRow.getAttribute('data-cnpj')); // Mark this CNPJ as having matches
+                } else {
+                    // This row doesn't match one or both filters
+                    keyRow.style.display = 'none';
                 }
-                cnpjGroups[cnpj].push(row);
             });
             
-            // Add grouped rows back to the table
-            Object.keys(cnpjGroups).sort().forEach(cnpj => {
-                const formattedCNPJ = formatCNPJ(cnpj);
-                const groupCount = cnpjGroups[cnpj].length;
-                
-                // Create group header
-                const headerRow = document.createElement('tr');
-                headerRow.className = 'cnpj-group-header';
-                headerRow.setAttribute('data-cnpj', cnpj);
-                headerRow.innerHTML = `
-                    <td colspan="7">
-                        <i class="fas fa-caret-right cnpj-toggle-icon"></i>
-                        CNPJ: <span class="cnpj-formatted">${formattedCNPJ}</span>
-                        <span class="badge bg-primary ms-2">${groupCount} chave(s)</span>
-                    </td>
-                `;
-                
-                // Add click event to toggle group visibility
-                headerRow.addEventListener('click', function() {
-                    const cnpj = this.getAttribute('data-cnpj');
-                    const icon = this.querySelector('.cnpj-toggle-icon');
-                    icon.classList.toggle('open');
+            // Then handle group headers - only show headers for groups that have matches
+            groupHeaders.forEach(header => {
+                const cnpj = header.getAttribute('data-cnpj');
+                if (cnpjMatches.has(cnpj) || (!cnpjFilter && !dateFilter)) {
+                    header.style.display = 'table-row';
                     
-                    const groupRows = table.querySelectorAll(`tr.key-row[data-cnpj="${cnpj}"]`);
-                    groupRows.forEach(row => {
-                        row.classList.toggle('cnpj-group-hidden');
-                    });
-                });
-                
-                table.appendChild(headerRow);
-                
-                // Add group rows
-                cnpjGroups[cnpj].forEach(row => {
-                    // Hide rows by default
-                    row.classList.add('cnpj-group-hidden');
-                    table.appendChild(row);
-                });
+                    // If filtering, ensure the toggle icon shows as expanded
+                    if (cnpjFilter || dateFilter) {
+                        const icon = header.querySelector('.cnpj-toggle-icon');
+                        icon.classList.add('open');
+                    }
+                } else {
+                    header.style.display = 'none';
+                }
             });
+            
+            // Update UI based on filter results
+            if (!cnpjFilter && !dateFilter) {
+                // No filters - show normal count
+                document.getElementById('totalKeysCount').textContent = keyRows.length;
+            } else {
+                // Show filtered count
+                const visibleCount = keyRows.filter(row => row.style.display !== 'none').length;
+                document.getElementById('totalKeysCount').textContent = `${visibleCount} (filtrados)`;
+            }
         }
 
-        // Function to validate NFe key format (44 digits)
+        // Função para validar chave NFe (44 dígitos)
         function isValidNfeKey(key) {
             return /^\d{44}$/.test(key);
         }
         
-        // Function to extract CNPJ from NFe key (positions 7-20)
+        // Função para extrair CNPJ de chave NFe (posições 7-20)
         function extractCNPJ(key) {
             if (!isValidNfeKey(key)) return 'CNPJ Inválido';
             return key.substring(6, 20);
         }
         
-        // Function to format CNPJ with proper punctuation
+        // Função para formatar CNPJ com pontuação correta
         function formatCNPJ(cnpj) {
             return cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
         }
 
-        // Function to save a single key to the server
+        // Função para salvar uma única chave para o servidor
         async function saveSingleKeyToServer(key) {
             try {
                 const response = await fetch('/save-key', {
@@ -516,7 +540,7 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    // Clear input field after successful submission
+                    // Limpa o campo de entrada após envio bem-sucedido
                     document.getElementById('nfeKeyInput').value = '';
                     
                     if (data.already_exists) {
@@ -524,7 +548,7 @@
                     } else {
                         updateGlobalStatus(`Chave NFe ${key} adicionada com sucesso.`, 'success');
                         
-                        // Reload the page to show the new key
+                        // Recarrega a página para mostrar a nova chave
                         setTimeout(() => {
                             location.reload();
                         }, 1500);
@@ -709,8 +733,14 @@
                 const data = await response.json();
 
                 if (data.success) {
+                    // Atualiza o cache local
+                    urlCache.set(key, data.url);
+                    
+                    // Atualiza a interface
                     updateStatus(key, '<i class="fas fa-check"></i> Download disponível', false, data.from_cache);
                     showUrlButton(key, data.url);
+                    
+                    // Inicia o download
                     await fetch(`/download/${key}`);
                     
                     // Registra o status como concluído no servidor
@@ -759,6 +789,8 @@
                     throw new Error(`${data.message} após ${maxRetries+1} tentativas`);
                 }
             } catch (error) {
+                console.error(`Erro ao processar chave ${key}:`, error);
+                
                 updateStatus(key, `<i class="fas fa-exclamation-triangle"></i> ${error.message}`, true);
                 
                 // Registra o status como erro no servidor
@@ -1093,63 +1125,6 @@
             filterKeys();
         }
 
-        function filterKeys() {
-            const cnpjFilter = document.getElementById('cnpjFilter').value;
-            const dateFilter = document.getElementById('dateFilter').value;
-            const keyRows = Array.from(document.querySelectorAll('.key-row'));
-            const groupHeaders = Array.from(document.querySelectorAll('.cnpj-group-header'));
-            
-            // First, handle all key rows
-            const cnpjMatches = new Set(); // Keep track of which CNPJs match the filter
-            
-            keyRows.forEach(keyRow => {
-                const cnpjCell = keyRow.querySelector('.cnpj-cell');
-                const anoMesCell = keyRow.querySelector('.ano-mes-cell');
-                const cnpj = cnpjCell.textContent;
-                const anoMes = anoMesCell.textContent.trim();
-                
-                // Check if row matches both filters
-                const cnpjMatch = !cnpjFilter || cnpj === cnpjFilter;
-                const dateMatch = !dateFilter || anoMes === dateFilter;
-                
-                if (cnpjMatch && dateMatch) {
-                    // This row matches both filters
-                    keyRow.style.display = 'table-row';
-                    keyRow.classList.remove('cnpj-group-hidden'); // Make sure it's visible even if group is collapsed
-                    cnpjMatches.add(keyRow.getAttribute('data-cnpj')); // Mark this CNPJ as having matches
-                } else {
-                    // This row doesn't match one or both filters
-                    keyRow.style.display = 'none';
-                }
-            });
-            
-            // Then handle group headers - only show headers for groups that have matches
-            groupHeaders.forEach(header => {
-                const cnpj = header.getAttribute('data-cnpj');
-                if (cnpjMatches.has(cnpj) || (!cnpjFilter && !dateFilter)) {
-                    header.style.display = 'table-row';
-                    
-                    // If filtering, ensure the toggle icon shows as expanded
-                    if (cnpjFilter || dateFilter) {
-                        const icon = header.querySelector('.cnpj-toggle-icon');
-                        icon.classList.add('open');
-                    }
-                } else {
-                    header.style.display = 'none';
-                }
-            });
-            
-            // Update UI based on filter results
-            if (!cnpjFilter && !dateFilter) {
-                // No filters - show normal count
-                document.getElementById('totalKeysCount').textContent = keyRows.length;
-            } else {
-                // Show filtered count
-                const visibleCount = keyRows.filter(row => row.style.display !== 'none').length;
-                document.getElementById('totalKeysCount').textContent = `${visibleCount} (filtrados)`;
-            }
-        }
-
         // Função para tentar novamente uma chave que falhou
         function retryKey(key) {
             // Limpa o status atual de erro
@@ -1176,6 +1151,91 @@
             // Inicia o processamento novamente, com contador de tentativas zerado
             processNFEAsync(key, 0);
         }
+
+        // Função para verificar o status de processamento das chaves
+        async function checkProcessingStatus() {
+            try {
+                const response = await fetch('/get-processing-status');
+                const data = await response.json();
+                
+                if (data.success && data.processing) {
+                    // Atualiza o status das chaves em processamento
+                    for (const [key, status] of Object.entries(data.processing)) {
+                        if (status.status === 'processing' || status.status === 'retry') {
+                            updateStatus(key, '<i class="fas fa-spinner fa-spin"></i> ' + status.message, false);
+                        } else if (status.status === 'error') {
+                            updateStatus(key, '<i class="fas fa-exclamation-triangle"></i> ' + status.message, true);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Erro ao verificar status de processamento:", error);
+            }
+        }
+        
+        // Function to organize keys by CNPJ
+        function organizeKeysByCNPJ() {
+            const table = document.getElementById('nfe-keys-table');
+            const rows = Array.from(table.querySelectorAll('tr.key-row'));
+            
+            if (rows.length === 0) return;
+            
+            // Update total keys count
+            document.getElementById('totalKeysCount').textContent = rows.length;
+            
+            // Remove all rows from the table
+            rows.forEach(row => row.remove());
+            
+            // Group rows by CNPJ
+            const cnpjGroups = {};
+            rows.forEach(row => {
+                const cnpj = row.getAttribute('data-cnpj');
+                if (!cnpjGroups[cnpj]) {
+                    cnpjGroups[cnpj] = [];
+                }
+                cnpjGroups[cnpj].push(row);
+            });
+            
+            // Add grouped rows back to the table
+            Object.keys(cnpjGroups).sort().forEach(cnpj => {
+                const formattedCNPJ = formatCNPJ(cnpj);
+                const groupCount = cnpjGroups[cnpj].length;
+                
+                // Create group header
+                const headerRow = document.createElement('tr');
+                headerRow.className = 'cnpj-group-header';
+                headerRow.setAttribute('data-cnpj', cnpj);
+                headerRow.innerHTML = `
+                    <td colspan="7">
+                        <i class="fas fa-caret-right cnpj-toggle-icon"></i>
+                        CNPJ: <span class="cnpj-formatted">${formattedCNPJ}</span>
+                        <span class="badge bg-primary ms-2">${groupCount} chave(s)</span>
+                    </td>
+                `;
+                
+                // Add click event to toggle group visibility
+                headerRow.addEventListener('click', function() {
+                    const cnpj = this.getAttribute('data-cnpj');
+                    const icon = this.querySelector('.cnpj-toggle-icon');
+                    icon.classList.toggle('open');
+                    
+                    const groupRows = table.querySelectorAll(`tr.key-row[data-cnpj="${cnpj}"]`);
+                    groupRows.forEach(row => {
+                        row.classList.toggle('cnpj-group-hidden');
+                    });
+                });
+                
+                table.appendChild(headerRow);
+                
+                // Add group rows
+                cnpjGroups[cnpj].forEach(row => {
+                    // Hide rows by default
+                    row.classList.add('cnpj-group-hidden');
+                    table.appendChild(row);
+                });
+            });
+        }
     </script>
+    <script src="{{ url_for('static', filename='js/organize-keys.js') }}"></script>
 </body>
 </html> 
