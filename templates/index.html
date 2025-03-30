@@ -248,6 +248,19 @@
                             <i class="fas fa-info-circle"></i>
                         </button>
                     </div>
+                    <div class="input-group mb-3">
+                        <label class="input-group-text" for="statusFilter">Filtrar por Status</label>
+                        <select class="form-select" id="statusFilter">
+                            <option value="">Todos</option>
+                            <option value="available">Download disponível</option>
+                            <option value="processing">Em processamento</option>
+                            <option value="waiting">Aguardando processamento</option>
+                            <option value="error">Com erro</option>
+                        </select>
+                        <button class="btn btn-outline-secondary" type="button" onclick="clearStatusFilter()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
                     <div class="ms-auto">
                         <span class="text-muted me-2">Total: <span id="totalKeysCount">0</span> chaves</span>
                         <div class="btn-group btn-group-sm">
@@ -355,12 +368,12 @@
 
         // Configuração de verificação periódica do cache
         let cacheCheckInterval;
-        
+
         // Inicializa os status de processamento
         document.addEventListener('DOMContentLoaded', function() {
             // Verifica se a função existe antes de chamá-la
             if (typeof organizeKeysByCNPJ === 'function') {
-                organizeKeysByCNPJ();
+            organizeKeysByCNPJ();
             } else {
                 console.warn('Função organizeKeysByCNPJ não está definida. Reagrupamento por CNPJ desativado.');
                 // Atualiza contador de chaves mesmo sem o agrupamento
@@ -378,12 +391,15 @@
             updateStatus('{{ key }}', '<i class="fas fa-exclamation-triangle"></i> {{ data.message|safe }}', true);
             {% endif %}
             {% endfor %}
-
+            
             // Add event listener for CNPJ filter
             document.getElementById('cnpjFilter').addEventListener('change', filterKeys);
             
             // Add event listener for date filter
             document.getElementById('dateFilter').addEventListener('change', filterKeys);
+            
+            // Add event listener for status filter
+            document.getElementById('statusFilter').addEventListener('change', filterKeys);
             
             // Restaura a configuração de concorrência salva
             const savedConcurrency = localStorage.getItem('concurrencyLimit');
@@ -456,6 +472,7 @@
         function filterKeys() {
             const cnpjFilter = document.getElementById('cnpjFilter').value;
             const dateFilter = document.getElementById('dateFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
             const keyRows = Array.from(document.querySelectorAll('.key-row'));
             const groupHeaders = Array.from(document.querySelectorAll('.cnpj-group-header'));
             
@@ -468,17 +485,45 @@
                 const cnpj = cnpjCell.textContent;
                 const anoMes = anoMesCell.textContent.trim();
                 
-                // Check if row matches both filters
+                // Check if row matches all filters
                 const cnpjMatch = !cnpjFilter || cnpj === cnpjFilter;
                 const dateMatch = !dateFilter || anoMes === dateFilter;
                 
-                if (cnpjMatch && dateMatch) {
-                    // This row matches both filters
+                // Verificação de status mais robusta
+                let statusMatch = true;
+                if (statusFilter) {
+                    const statusCell = keyRow.querySelector('.status-cell');
+                    
+                    switch(statusFilter) {
+                        case 'available':
+                            // Verifica se tem botão de URL visível
+                            const urlButton = document.getElementById(`url-btn-${keyRow.querySelector('.key-cell').textContent.trim()}`);
+                            statusMatch = urlButton && urlButton.style.display !== 'none';
+                            break;
+                        case 'processing':
+                            // Verifica se contém o ícone de spinner
+                            statusMatch = statusCell.innerHTML.includes('fa-spinner fa-spin');
+                            break;
+                        case 'waiting':
+                            // Verifica se tem o texto "Aguardando processamento"
+                            statusMatch = statusCell.innerHTML.includes('Aguardando processamento');
+                            break;
+                        case 'error':
+                            // Verifica se contém o ícone de erro
+                            statusMatch = statusCell.innerHTML.includes('fa-exclamation-triangle');
+                            break;
+                        default:
+                            statusMatch = true;
+                    }
+                }
+                
+                if (cnpjMatch && dateMatch && statusMatch) {
+                    // This row matches all filters
                     keyRow.style.display = 'table-row';
                     keyRow.classList.remove('cnpj-group-hidden'); // Make sure it's visible even if group is collapsed
                     cnpjMatches.add(keyRow.getAttribute('data-cnpj')); // Mark this CNPJ as having matches
                 } else {
-                    // This row doesn't match one or both filters
+                    // This row doesn't match one or more filters
                     keyRow.style.display = 'none';
                 }
             });
@@ -486,11 +531,11 @@
             // Then handle group headers - only show headers for groups that have matches
             groupHeaders.forEach(header => {
                 const cnpj = header.getAttribute('data-cnpj');
-                if (cnpjMatches.has(cnpj) || (!cnpjFilter && !dateFilter)) {
+                if (cnpjMatches.has(cnpj) || (!cnpjFilter && !dateFilter && !statusFilter)) {
                     header.style.display = 'table-row';
                     
                     // If filtering, ensure the toggle icon shows as expanded
-                    if (cnpjFilter || dateFilter) {
+                    if (cnpjFilter || dateFilter || statusFilter) {
                         const icon = header.querySelector('.cnpj-toggle-icon');
                         icon.classList.add('open');
                     }
@@ -500,7 +545,7 @@
             });
             
             // Update UI based on filter results
-            if (!cnpjFilter && !dateFilter) {
+            if (!cnpjFilter && !dateFilter && !statusFilter) {
                 // No filters - show normal count
                 document.getElementById('totalKeysCount').textContent = keyRows.length;
             } else {
@@ -875,7 +920,7 @@
                                 
                                 // Adiciona à lista de falhas apenas se ainda não atingiu o limite de tentativas
                                 if (retryKeys[key] <= 5) {
-                                    failedKeys.push(key);
+                                failedKeys.push(key);
                                 }
                             }
                             return success;
@@ -1122,6 +1167,11 @@
 
         function clearDateFilter() {
             document.getElementById('dateFilter').value = '';
+            filterKeys();
+        }
+
+        function clearStatusFilter() {
+            document.getElementById('statusFilter').value = '';
             filterKeys();
         }
 
