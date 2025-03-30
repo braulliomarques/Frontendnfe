@@ -232,6 +232,7 @@
                             <i class="fas fa-tasks"></i>
                         </span>
                         <select class="form-select" id="concurrencyLimit" aria-label="Limite de processamento simultâneo">
+                            <option value="1">1 chave simultânea</option>
                             <option value="2">2 chaves simultâneas</option>
                             <option value="5">5 chaves simultâneas</option>
                             <option value="10" selected>10 chaves simultâneas</option>
@@ -736,7 +737,7 @@
             progress.textContent = `${percentage}% (${current}/${total})`;
         }
 
-        async function processNFEAsync(key, retryCount = 0, maxRetries = 5) {
+        async function processNFEAsync(key, retryCount = 0, maxRetries = 9999) {
             const button = document.getElementById(`btn-${key}`);
             const urlButton = document.getElementById(`url-btn-${key}`);
             button.disabled = true;
@@ -757,7 +758,7 @@
                 // Adiciona informação de retry ao status, caso seja uma tentativa subsequente
                 let statusMessage = '<i class="fas fa-spinner fa-spin"></i> Obtendo URL...';
                 if (retryCount > 0) {
-                    statusMessage = `<i class="fas fa-spinner fa-spin"></i> Obtendo URL... (Tentativa ${retryCount+1}/${maxRetries+1})`;
+                    statusMessage = `<i class="fas fa-spinner fa-spin"></i> Obtendo URL... (Tentativa ${retryCount+1})`;
                 }
                 updateStatus(key, statusMessage, false);
                 
@@ -770,7 +771,7 @@
                     body: JSON.stringify({
                         key: key,
                         status: 'processing',
-                        message: retryCount > 0 ? `Obtendo URL... (Tentativa ${retryCount+1}/${maxRetries+1})` : 'Obtendo URL...'
+                        message: retryCount > 0 ? `Obtendo URL... (Tentativa ${retryCount+1})` : 'Obtendo URL...'
                     })
                 });
 
@@ -804,34 +805,31 @@
                     button.disabled = false;
                     return true;
                 } else {
-                    // Verifica se ainda pode fazer mais tentativas
-                    if (retryCount < maxRetries) {
-                        console.log(`Tentativa ${retryCount+1} falhou para a chave ${key}. Tentando novamente em 5 segundos...`);
-                        
-                        // Registra o status de retry no servidor
-                        await fetch('/set-processing-status', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                key: key,
-                                status: 'retry',
-                                message: `Falha na tentativa ${retryCount+1}. Nova tentativa em 5 segundos...`
-                            })
-                        });
-                        
-                        // Atualiza o status na interface
-                        updateStatus(key, `<i class="fas fa-sync fa-spin"></i> Falha na tentativa ${retryCount+1}. Nova tentativa em 5 segundos...`, false);
-                        
-                        // Aguarda 5 segundos antes de tentar novamente
-                        await new Promise(resolve => setTimeout(resolve, 5000));
-                        
-                        // Chama recursivamente com incremento no contador de tentativas
-                        return processNFEAsync(key, retryCount + 1, maxRetries);
-                    }
+                    // Sempre tenta novamente, sem limitação de número de tentativas
+                    console.log(`Tentativa ${retryCount+1} falhou para a chave ${key}. Tentando novamente em 5 segundos...`);
                     
-                    throw new Error(`${data.message} após ${maxRetries+1} tentativas`);
+                    // Registra o status de retry no servidor
+                    await fetch('/set-processing-status', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            key: key,
+                            status: 'retry',
+                            message: `Falha na tentativa ${retryCount+1}. Nova tentativa em 5 segundos...`
+                        })
+                    });
+                    
+                    // Atualiza o status na interface
+                    updateStatus(key, `<i class="fas fa-sync fa-spin"></i> Falha na tentativa ${retryCount+1}. Nova tentativa em 5 segundos...`, false);
+                    
+                    // Aguarda 5 segundos antes de tentar novamente
+                    await new Promise(resolve => setTimeout(resolve, 5000));
+                    
+                    // Chama recursivamente com incremento no contador de tentativas
+                    // Mantém o maxRetries apenas para exibição do contador, mas não limita a quantidade de tentativas
+                    return processNFEAsync(key, retryCount + 1, maxRetries);
                 }
             } catch (error) {
                 console.error(`Erro ao processar chave ${key}:`, error);
@@ -946,13 +944,13 @@
             }
 
             // Verifica se devemos fazer nova tentativa com as chaves que falharam
-            if (failedKeys.length > 0 && !shouldCancelDownloads && retryAttempt < 3) {
+            if (failedKeys.length > 0 && !shouldCancelDownloads) {
                 isDownloading = false;
                 document.getElementById('downloadProgress').style.display = 'none';
                 document.getElementById('cancelBtn').style.display = 'none';
                 
                 // Mensagem temporária sobre o reprocessamento
-                updateGlobalStatus(`Reprocessando ${failedKeys.length} chave(s) com erro. Tentativa ${retryAttempt + 1}/3...`, 'warning');
+                updateGlobalStatus(`Reprocessando ${failedKeys.length} chave(s) com erro. Tentativa ${retryAttempt + 1}...`, 'warning');
                 
                 // Aguarda 5 segundos antes de iniciar novo processamento
                 await new Promise(resolve => setTimeout(resolve, 5000));
@@ -970,8 +968,8 @@
             const remainingCount = document.querySelectorAll('.url-button[style="display: none;"]').length;
             let message = `Processamento concluído: ${successCount} sucesso(s), ${failCount} falha(s)`;
             
-            if (failedKeys.length > 0 && retryAttempt >= 3) {
-                message += `. Máximo de tentativas atingido. ${failedKeys.length} chave(s) ainda com erro.`;
+            if (failedKeys.length > 0) {
+                message += `. ${failedKeys.length} chave(s) ainda em processamento.`;
             } else if (remainingCount > 0) {
                 message += `. Ainda restam ${remainingCount} chave(s) pendente(s).`;
             }
@@ -1199,7 +1197,7 @@
             });
             
             // Inicia o processamento novamente, com contador de tentativas zerado
-            processNFEAsync(key, 0);
+            processNFEAsync(key, 0, 9999);
         }
 
         // Função para verificar o status de processamento das chaves
