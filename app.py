@@ -352,7 +352,7 @@ def set_processing_status():
     try:
         data = request.json
         key = data.get('key')
-        status = data.get('status')  # 'processing', 'done', 'error'
+        status = data.get('status')  # 'processing', 'retry', 'done', 'error'
         message = data.get('message', '')
         
         if not key or not status:
@@ -362,12 +362,12 @@ def set_processing_status():
         processing_cache = load_processing_cache()
         
         # Status 'done' remove do cache de processamento
-        # Status 'error' mantém no cache, apenas atualiza o status
+        # Status 'error' ou 'retry' mantém no cache, apenas atualiza o status
         if status == 'done':
             if key in processing_cache:
                 del processing_cache[key]
         else:
-            # Status 'processing' ou 'error' adiciona/atualiza o cache
+            # Status 'processing', 'retry' ou 'error' adiciona/atualiza o cache
             processing_cache[key] = {
                 'status': status,
                 'message': message,
