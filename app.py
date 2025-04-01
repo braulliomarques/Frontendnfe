@@ -72,8 +72,8 @@ def read_nfe_keys(filename: str):
     except FileNotFoundError:
         return []
 
-def get_nfe_url(key: str):
-    """Obtém a URL de download da NFE."""
+def get_nfe_url(key: str, captcha_token=None):
+    """Obtém a URL de download da NFE e dados detalhados."""
     try:
         # Verifica primeiro no cache
         cache = load_cache()
@@ -81,19 +81,35 @@ def get_nfe_url(key: str):
             return {
                 'success': True,
                 'url': cache[key]['url'],
+                'dados': cache[key].get('dados', None),
                 'message': 'URL obtida do cache',
                 'from_cache': True
             }
 
+        # Verifica se o token 2captcha foi fornecido
+        if not captcha_token:
+            logging.warning(f"Token 2captcha não fornecido para a chave {key}")
+            return {
+                'success': False,
+                'message': 'Token 2captcha não fornecido'
+            }
+
         # Se não estiver no cache, faz a requisição
-        url = f"http://127.0.0.1:3002/api/nfe/interceptar-url/{key}"
-        response = requests.get(url)
+        url = "http://localhost:3002/api/nfe/interceptar-url"
+        payload = {
+            "chave": key,
+            "token2captcha": captcha_token
+        }
+        
+        logging.info(f"Fazendo requisição para a chave {key} com token 2captcha")
+        response = requests.post(url, json=payload)
         data = response.json()
         
         if data.get('success'):
             # Salva no cache
             cache[key] = {
                 'url': data['url'],
+                'dados': data.get('dadosNFe', None),
                 'timestamp': datetime.now().isoformat()
             }
             save_cache(cache)
@@ -101,6 +117,7 @@ def get_nfe_url(key: str):
             return {
                 'success': True,
                 'url': data['url'],
+                'dados': data.get('dadosNFe', None),
                 'message': 'URL obtida com sucesso',
                 'from_cache': False
             }
@@ -135,16 +152,23 @@ def landing():
 @app.route('/get-url/<key>')
 def get_url(key):
     """Endpoint para obter URL de download."""
-    result = get_nfe_url(key)
+    # Obter token 2captcha do parâmetro da URL
+    captcha_token = request.args.get('token')
+    result = get_nfe_url(key, captcha_token)
     return jsonify(result)
 
-@app.route('/download/<key>')
+@app.route('/download/<key>', methods=['GET'])
 def download_nfe(key):
     """Endpoint para download direto do XML."""
     try:
+        # Obter token 2captcha do parâmetro da URL, se disponível
+        captcha_token = request.args.get('token')
+        
         # Primeiro, obtém a URL
-        result = get_nfe_url(key)
+        result = get_nfe_url(key, captcha_token)
         if not result['success']:
+            # Registra o status de erro no servidor
+            set_processing_status(key, 'error', f"Falha ao obter URL: {result['message']}")
             return jsonify({'error': result['message']}), 400
 
         # Configura headers para simular um navegador
@@ -152,10 +176,18 @@ def download_nfe(key):
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         }
 
-        # Faz o download do arquivo
-        response = requests.get(result['url'], headers=headers, stream=True)
-        response.raise_for_status()
+        try:
+            # Faz o download do arquivo
+            response = requests.get(result['url'], headers=headers, stream=True)
+            response.raise_for_status()  # Isso lançará uma exceção se o status não for 2xx
+        except requests.exceptions.RequestException as e:
+            # Registra o erro específico do download
+            error_msg = f"Erro ao baixar XML: {str(e)}"
+            logging.error(f"{error_msg} para a chave {key}")
+            set_processing_status(key, 'error', error_msg)
+            return jsonify({'error': error_msg}), 400
 
+        # Se chegou aqui, download foi bem-sucedido
         # Cria um arquivo temporário para o download
         with tempfile.NamedTemporaryFile(delete=False, suffix='.xml') as tmp:
             for chunk in response.iter_content(chunk_size=8192):
@@ -163,6 +195,9 @@ def download_nfe(key):
                     tmp.write(chunk)
             tmp_path = tmp.name
 
+        # Registra o status de sucesso
+        set_processing_status(key, 'completed', 'Download concluído com sucesso')
+            
         # Envia o arquivo para download
         return send_file(
             tmp_path,
@@ -172,8 +207,11 @@ def download_nfe(key):
         )
 
     except Exception as e:
-        logging.error(f"Erro ao fazer download da NFE {key}: {str(e)}")
-        return jsonify({'error': 'Erro ao fazer download do arquivo'}), 500
+        error_msg = f"Erro ao fazer download da NFE: {str(e)}"
+        logging.error(f"{error_msg} para a chave {key}")
+        # Registra o status de erro no servidor
+        set_processing_status(key, 'error', error_msg)
+        return jsonify({'error': error_msg}), 500
 
 @app.route('/clear-cache', methods=['POST'])
 def clear_cache_endpoint():
@@ -347,7 +385,7 @@ def delete_all_keys():
         return jsonify({'success': False, 'message': f'Erro ao remover todas as chaves: {str(e)}'}), 500
 
 @app.route('/set-processing-status', methods=['POST'])
-def set_processing_status():
+def update_processing_status():
     """Endpoint para definir o status de processamento de uma chave."""
     try:
         data = request.json
@@ -358,29 +396,17 @@ def set_processing_status():
         if not key or not status:
             return jsonify({'success': False, 'message': 'Chave ou status não fornecidos'}), 400
         
-        # Carrega o cache existente
-        processing_cache = load_processing_cache()
-        
-        # Status 'done' remove do cache de processamento
-        # Status 'error' ou 'retry' mantém no cache, apenas atualiza o status
-        if status == 'done':
-            if key in processing_cache:
-                del processing_cache[key]
+        # Chama a função auxiliar para atualizar o status
+        if set_processing_status(key, status, message):
+            return jsonify({
+                'success': True,
+                'message': 'Status de processamento atualizado'
+            })
         else:
-            # Status 'processing', 'retry' ou 'error' adiciona/atualiza o cache
-            processing_cache[key] = {
-                'status': status,
-                'message': message,
-                'timestamp': datetime.now().isoformat()
-            }
-        
-        # Salva o cache atualizado
-        save_processing_cache(processing_cache)
-        
-        return jsonify({
-            'success': True,
-            'message': 'Status de processamento atualizado'
-        })
+            return jsonify({
+                'success': False,
+                'message': 'Erro ao atualizar status de processamento'
+            }), 500
         
     except Exception as e:
         logging.error(f"Erro ao atualizar status de processamento: {str(e)}")
@@ -412,6 +438,28 @@ def get_url_cache():
         logging.error(f"Erro ao obter cache de URLs: {str(e)}")
         return jsonify({'success': False, 'message': f'Erro: {str(e)}'}), 500
 
+@app.route('/get-details/<key>', methods=['GET'])
+def get_details(key):
+    """Endpoint para obter os detalhes da NFe."""
+    try:
+        # Obtém dados do cache
+        cache = load_cache()
+        
+        if key in cache and 'dados' in cache[key]:
+            return jsonify({
+                'success': True,
+                'dados': cache[key]['dados'],
+                'url': cache[key]['url']
+            })
+        
+        return jsonify({
+            'success': False,
+            'message': 'Detalhes não encontrados no cache'
+        }), 404
+    except Exception as e:
+        logging.error(f"Erro ao obter detalhes da NFe {key}: {str(e)}")
+        return jsonify({'success': False, 'message': f'Erro: {str(e)}'}), 500
+
 @app.route('/clear-processing-cache', methods=['POST'])
 def clear_processing_cache_endpoint():
     """Endpoint para limpar o cache de processamento."""
@@ -430,6 +478,30 @@ def clear_processing_cache_endpoint():
             'success': False,
             'message': f'Erro ao limpar cache de processamento: {str(e)}'
         }), 500
+
+def set_processing_status(key, status, message):
+    """Atualiza o status de processamento de uma chave NFe."""
+    try:
+        processing_cache = load_processing_cache()
+        
+        # Status 'done' remove do cache de processamento
+        # Status 'error', 'processing' ou 'retry' mantém no cache
+        if status == 'done':
+            if key in processing_cache:
+                del processing_cache[key]
+        else:
+            # Status 'processing', 'retry', 'error' ou 'completed' adiciona/atualiza o cache
+            processing_cache[key] = {
+                'status': status,
+                'message': message,
+                'timestamp': datetime.now().isoformat()
+            }
+        
+        save_processing_cache(processing_cache)
+        return True
+    except Exception as e:
+        logging.error(f"Erro ao atualizar status de processamento para {key}: {str(e)}")
+        return False
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=5000) 
